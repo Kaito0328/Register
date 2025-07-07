@@ -1,0 +1,61 @@
+{
+    "name": ".temp-app Container",
+    "dockerComposeFile": "docker-compose.yml",
+    // VSCodeが主に接続するサービス。backendに接続してもfrontendの操作は可能
+    "service": "backend",
+    "workspaceFolder": "/workspace",
+    // forwardPortsで転送するポートを指定
+    "forwardPorts": [8080, 5432],
+    "customizations": {
+        "vscode": {
+            // JavaとTypeScript/React両方の設定を記述
+            "settings": {
+                // Java settings
+                "java.compile.nullAnalysis.mode": "automatic",
+                "java.format.settings.profile": "GoogleStyle",
+                "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+                "[java]": {
+                    "editor.defaultFormatter": "redhat.java",
+                    "editor.formatOnSave": true
+                },
+                // TypeScript/React settings
+                "[typescript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                    "editor.formatOnSave": true
+                },
+                "[typescriptreact]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                    "editor.formatOnSave": true
+                },
+                "workbench.colorCustomizations": {
+                "editorIndentGuide.background1": "#b22222",
+                "editorIndentGuide.background2": "#ff4500",
+                "editorIndentGuide.background3": "#ffd700",
+                "editorIndentGuide.background4": "#228b22",
+                "editorIndentGuide.background5": "#000080",
+                "editorIndentGuide.background6": "#8b008b",
+                "editorIndentGuide.activeBackground1": "#fff",
+                "editorIndentGuide.activeBackground2": "#fff",
+                "editorIndentGuide.activeBackground3": "#fff",
+                "editorIndentGuide.activeBackground4": "#fff",
+                "editorIndentGuide.activeBackground5": "#fff",
+                "editorIndentGuide.activeBackground6": "#fff"
+                },
+            },
+            // 必要な拡張機能をここにまとめる
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-gradle",
+                "esbenp.prettier-vscode",
+                "eamodio.gitlens",
+                "GitHub.copilot",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "streetsidesoftware.code-spell-checker"
+            ]
+        }
+    },
+    "containerEnv": {
+        "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}"
+    },
+    "remoteUser": "vscode"
+}
