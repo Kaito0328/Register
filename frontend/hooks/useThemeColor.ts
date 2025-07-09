@@ -1,21 +1,10 @@
+import { useColorScheme } from 'react-native';
+
 /**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
+ * 現在のアプリケーションのカラースキーム（'light'または'dark'）を返すカスタムフック。
+ * useColorSchemeがnullを返す場合（非常に稀なケース）は、'light'をフォールバックとします。
  */
-
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
-) {
+export const useThemeColor = (): 'light' | 'dark' => {
   const theme = useColorScheme() ?? 'light';
-  const colorFromProps = props[theme];
-
-  if (colorFromProps) {
-    return colorFromProps;
-  } else {
-    return Colors[theme][colorName];
-  }
-}
+  return theme;
+};
