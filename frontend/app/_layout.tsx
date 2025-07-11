@@ -8,7 +8,6 @@ import DrawerContent from "@/components/layout/DrawerContent";
 import { NotesProvider } from "@/contexts/NotesContext";
 
 export default function RootLayout() {
-  const theme = useThemeColor();
 
   const headerStyle = getComponentStyle({
     color: { colorKey: CoreColorKey.Primary, properties: [ColorPropertyKey.Bg] },

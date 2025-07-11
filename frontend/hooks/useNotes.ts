@@ -24,7 +24,7 @@ export const useNotes = () => {
     };
     setNotes((prev) => [newNote, ...prev]);
     return newNote;
-  }, []);
+  }, [notes]);
 
   useEffect(() => {
     console.log('Notes updated:', notes);
@@ -38,10 +38,18 @@ export const useNotes = () => {
   const updateNote = useCallback((id: string, text: string) => {
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === id ? { ...note, text, title: text.split('\n')[0].slice(0, 20) } : note
+        note.id === id ? { ...note, text, title: note.title ?? text.split('\n')[0].slice(0, 20) } : note
       )
     );
-  }, []);
+  }, [notes]);
 
-  return { notes, createNote, findNoteById, updateNote };
+  const updateNoteTitle = useCallback((id: string, title: string) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, title } : note
+      )
+    );
+  }, [notes]);  
+
+  return { notes, createNote, findNoteById, updateNote, updateNoteTitle };
 };

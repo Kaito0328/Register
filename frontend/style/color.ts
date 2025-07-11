@@ -60,12 +60,13 @@ export type ColorStyle = {
   isActive?: boolean;
   isFocused?: boolean;
   isLoading?: boolean;
+  not_bg?: boolean; // 背景色を適用するかどうか
 };
 
 // スタイルオブジェクトを生成するヘルパー関数
 export const getColorStyle = (
   map: ColorMap,
-  style: ColorStyle
+  style: ColorStyle,
 ): StyleObject => {
   const themeColor = useThemeColor();
   const themeMap = map[themeColor];
@@ -79,7 +80,9 @@ export const getColorStyle = (
     if (!stateStyles) continue;
 
     // 1. デフォルトのスタイルを適用
-    Object.assign(combinedStyle, stateStyles.default);
+    if (prop !== ColorPropertyKey.Bg || !style.not_bg ) {
+      Object.assign(combinedStyle, stateStyles.default);
+    }
 
     // 2. 状態に応じてスタイルを上書き
     if (style.isLoading && stateStyles.loading) {

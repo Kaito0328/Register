@@ -17,7 +17,7 @@ export const MemoItem: React.FC<Props> = ({
     title
 }) => {
   return (
-    <BaseButton onPress={onPress} pressableStyleKit={{color: {colorKey: CoreColorKey.Base, properties: [ColorPropertyKey.Bg]}}}>
+    <BaseButton onPress={onPress} pressableStyleKit={{color: {colorKey: CoreColorKey.Base, not_bg: true}}}>
         {title}
     </BaseButton>
   );

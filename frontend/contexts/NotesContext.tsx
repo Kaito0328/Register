@@ -7,6 +7,7 @@ type NotesContextType = {
   createNote: (text: string) => Note;
   findNoteById: (id: string | undefined) => Note | undefined;
   updateNote: (id: string, text: string) => void;
+  updateNoteTitle: (id: string, title: string) => void;
 };
 
 // Contextを作成。初期値はundefinedでOK

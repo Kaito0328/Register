@@ -16,7 +16,6 @@ import { BaseView } from '../base/BaseView';
 export default function DrawerContent(props: any) {
   const { notes, createNote } = useNotes();
   const theme = useThemeColor();
-  const colors = defaultColorMap[theme];
 
   const handleCreateNote = () => {
     const newNote = createNote('');
@@ -28,7 +27,8 @@ export default function DrawerContent(props: any) {
   return (
     <BaseView style={styles.container}>
       <BaseText style={styles.listHeader} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>ノート一覧</BaseText>
-      <BaseView style={[styles.divider, { backgroundColor: colors.base.bg?.default.backgroundColor }]} styleKit={{color: {colorKey: CoreColorKey.Base}}} />
+      <BaseView style={styles.divider} styleKit={{color: {colorKey: CoreColorKey.Primary}}} />
+              <CreateMemoButton onPress={handleCreateNote} />
 
       <ScrollView>
         {notes.map((note) => (
@@ -41,7 +41,7 @@ export default function DrawerContent(props: any) {
             }}
           />
         ))}
-        <CreateMemoButton onPress={handleCreateNote} />
+
       </ScrollView>
     </BaseView>
   );

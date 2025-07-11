@@ -16,6 +16,10 @@ type NoteEditorProps = {
 export default function NoteEditor({ note, onSave }: NoteEditorProps) {
   const [text, setText] = useState(note.text);
 
+    useEffect(() => {
+    setText(note.text);
+  }, [note]);
+
   // 3秒間入力がなかったら自動で保存する
   useEffect(() => {
     const handler = setTimeout(() => {
