@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
-import { Pressable, type PressableProps } from 'react-native';
+import React from 'react';
+import {
+  Pressable,
+  type PressableProps,
+  type PressableStateCallbackType,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import { CoreColorKey, ColorPropertyKey } from '@/style/color';
 import { SizeKey, SizeProperty } from '@/style/size';
-import { FontWeightKey } from '@/style/fontWeight';
 import { RoundKey } from '@/style/rounded';
 import { ShadowKey } from '@/style/shadow';
-import { ComponentStyle, getComponentStyle, PartialComponentStyle } from '@/style/style';
+import { getComponentStyle, type ComponentStyle, type PartialComponentStyle } from '@/style/style';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { pressableStyleMaps } from '@/styleMap/component/PressableStyleMap';
+import { getViewStyle } from '@/style/viewStyle';
 
 // BasePressableのデフォルトの見た目を定義
+// ★★★ 文字に関するプロパティ(Text)を削除 ★★★
 const defaultStyle: ComponentStyle = {
   color: {
     colorKey: CoreColorKey.Primary,
-    properties: [ColorPropertyKey.Bg, ColorPropertyKey.Border],
+    properties: [ColorPropertyKey.Bg, ColorPropertyKey.Border], // 背景と枠線のみ
   },
   size: {
     sizeKey: SizeKey.MD,
-    properties: [SizeProperty.Padding],
+    properties: [SizeProperty.Padding], // 内側の余白のみ
   },
   roundKey: RoundKey.Md,
   shadowKey: ShadowKey.SM,
@@ -27,25 +35,35 @@ export type BasePressableProps = PressableProps & {
   styleKit?: PartialComponentStyle;
 };
 
-export const BasePressable: React.FC<BasePressableProps> = ({ styleKit, style, ...props }) => {
-  // 押されているかどうかをstateで管理
-  const [isActive, setIsActive] = useState(false);
-
-  // デフォルトスタイルをisActive状態で上書き
-  const activeStyleKit: PartialComponentStyle = {
-    color: {
-      isActive: isActive,
-    },
-  };
-
-  const themedStyle = getComponentStyle(defaultStyle, activeStyleKit);
-  
+export const BasePressable: React.FC<BasePressableProps> = ({
+  styleKit,
+  style,
+  ...props
+}) => {
 
   return (
     <Pressable
-      onPressIn={() => setIsActive(true)}
-      onPressOut={() => setIsActive(false)}
-      style={({ pressed }) => [themedStyle, typeof style === 'function' ? style({ pressed }) : style]}
+      // ★ styleプロパティの関数を正しく実装
+      style={(state: PressableStateCallbackType): StyleProp<ViewStyle> => {
+        // 押下状態(isActive)をstateから取得してマージ
+        const mergedStyleKit: PartialComponentStyle = {
+          ...styleKit,
+          color: {
+            ...styleKit?.color,
+            isActive: state.pressed,
+          },
+        };
+
+        // スタイルを生成
+        const themedStyle = getViewStyle(
+          defaultStyle,
+          mergedStyleKit,
+          pressableStyleMaps
+        );
+
+        // 外部から渡されたstyleも配列に含めて返す
+        return [themedStyle, typeof style === 'function' ? style(state) : style];
+      }}
       {...props}
     />
   );

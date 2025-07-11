@@ -3,6 +3,7 @@ import { View, type ViewProps } from 'react-native';
 import { CoreColorKey, ColorPropertyKey } from '@/style/color';
 import { SizeKey, SizeProperty } from '@/style/size';
 import { ComponentStyle, getComponentStyle, PartialComponentStyle } from '@/style/style';
+import { getViewStyle } from '@/style/viewStyle';
 
 // BaseViewのデフォルトの見た目を定義
 const defaultStyle: ComponentStyle = {
@@ -22,7 +23,7 @@ export type BaseViewProps = ViewProps & {
 };
 
 export const BaseView: React.FC<BaseViewProps> = ({ styleKit, style, ...props }) => {
-  const themedStyle = getComponentStyle(defaultStyle, styleKit);
+  const themedStyle = getViewStyle(defaultStyle, styleKit);
 
   return <View style={[themedStyle, style]} {...props} />;
 };

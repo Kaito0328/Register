@@ -5,6 +5,7 @@ import { getComponentStyle } from "@/style/style";
 import { CoreColorKey, ColorPropertyKey } from "@/style/color";
 import { SizeKey, SizeProperty } from "@/style/size";
 import DrawerContent from "@/components/layout/DrawerContent";
+import { NotesProvider } from "@/contexts/NotesContext";
 
 export default function RootLayout() {
   const theme = useThemeColor();
@@ -14,12 +15,8 @@ export default function RootLayout() {
     size: { sizeKey: SizeKey.MD, properties: [] }
   });
 
-  const headerTintColor = getComponentStyle({
-    color: { colorKey: CoreColorKey.Primary, properties: [ColorPropertyKey.Text] },
-    size: { sizeKey: SizeKey.MD, properties: [] }
-  }, {});
-
   return (
+          <NotesProvider>
     <Drawer
       // ★ハンバーガーメニューの中身をカスタムコンポーネントで描画
       drawerContent={(props) => <DrawerContent {...props} />}
@@ -30,6 +27,22 @@ export default function RootLayout() {
         headerLeft: () => <DrawerToggleButton/>,
       }}
     >
+
+      <Drawer.Screen 
+  name="+not-found" 
+  options={{ 
+    // この行を追加
+    drawerItemStyle: { display: 'none' } 
+  }} 
+/>
+      <Drawer.Screen 
+  name="(tabs)" 
+  options={{ 
+    // この行を追加
+    drawerItemStyle: { display: 'none' } 
+  }} 
+/>
+
       <Drawer.Screen
         name="index"
         options={{
@@ -38,6 +51,8 @@ export default function RootLayout() {
       />
       {/* 他の画面はDrawerに表示しないようにする */}
       <Drawer.Screen name="note/[id]" options={{ drawerItemStyle: { display: 'none' } }} />
+
     </Drawer>
+    </NotesProvider>
   );
 }

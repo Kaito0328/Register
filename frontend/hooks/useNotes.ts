@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export type Note = {
   id: string;
@@ -18,13 +18,17 @@ export const useNotes = () => {
 
   const createNote = useCallback((text: string): Note => {
     const newNote: Note = {
-      id: Date.now().toString(),
+      id: (notes.length + 1).toString() , // 簡易的なID生成
       text,
       createdAt: Date.now(),
     };
     setNotes((prev) => [newNote, ...prev]);
     return newNote;
   }, []);
+
+  useEffect(() => {
+    console.log('Notes updated:', notes);
+  }, [notes]);
 
   const findNoteById = useCallback((id: string | undefined): Note | undefined => {
     if (!id) return undefined;

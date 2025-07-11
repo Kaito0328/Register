@@ -1,9 +1,9 @@
 import React from 'react';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useNotes } from '@/hooks/useNotes';
 import NoteEditor from '@/components/editor/NoteEditor';
 import { BaseText } from '@/components/base/BaseText';
 import { BaseView } from '@/components/base/BaseView';
+import { useNotes } from '@/contexts/NotesContext';
 
 export default function NoteDetailScreen() {
   // URLからノートのIDを取得
@@ -11,6 +11,9 @@ export default function NoteDetailScreen() {
   const { findNoteById, updateNote } = useNotes();
 
   const note = findNoteById(id);
+  console.log("notes:", useNotes().notes);
+  console.log('NoteDetailScreen: id', id);
+  console.log('NoteDetailScreen: note', note);
 
   if (!note) {
     return (

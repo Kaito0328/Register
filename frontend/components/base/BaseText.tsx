@@ -4,6 +4,7 @@ import { CoreColorKey, ColorPropertyKey } from '@/style/color';
 import { SizeKey, SizeProperty } from '@/style/size';
 import { FontWeightKey } from '@/style/fontWeight';
 import { ComponentStyle, getComponentStyle, PartialComponentStyle } from '@/style/style';
+import { getTextStyle } from '@/style/textStyle';
 
 // BaseTextのデフォルトの見た目を定義
 const defaultStyle: ComponentStyle = {
@@ -24,7 +25,7 @@ export type BaseTextProps = TextProps & {
 };
 
 export const BaseText: React.FC<BaseTextProps> = ({ styleKit, style, ...props }) => {
-  const themedStyle = getComponentStyle(defaultStyle, styleKit);
+  const themedStyle = getTextStyle(defaultStyle, styleKit);
 
   return <Text style={[themedStyle, style]} {...props} />;
 };

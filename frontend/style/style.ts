@@ -6,9 +6,6 @@ import { getShadowStyle, ShadowMap, ShadowKey } from './shadow';
 import { getFontWeightStyle, FontWeightKey, FontWeightMap } from './fontWeight';
 import { defaultColorMap } from '@/styleMap/defaults/defaultColorMap';
 import { defaultSizeMap } from '@/styleMap/defaults/defaultSizeMap';
-import { defaultRoundMap } from '@/styleMap/defaults/defaultRoundMap';
-import { defaultShadowMap } from '@/styleMap/defaults/defaultShadowMap';
-import { defaultFontWeightMap } from '@/styleMap/defaults/defaultFontWeightMap';
 
 // 型定義
 export type ComponentStyle = {
@@ -27,9 +24,9 @@ export type PartialComponentStyle = Omit<Partial<ComponentStyle>, 'color' | 'siz
 export type StyleMaps = {
   colorMap: ColorMap;
   sizeMap: SizeMap;
-  roundMap: RoundMap;
-  shadowMap: ShadowMap;
-  fontWeightMap: FontWeightMap;
+  roundMap?: RoundMap;
+  shadowMap?: ShadowMap;
+  fontWeightMap?: FontWeightMap;
 };
 
 
@@ -37,7 +34,7 @@ export type StyleMaps = {
 export const getComponentStyle = (
   defaultStyle: ComponentStyle,
   style?: PartialComponentStyle,
-  maps?: Partial<StyleMaps> 
+  maps?: StyleMaps 
 ) => {
   // デフォルトと指定されたスタイルをマージ（マージロジックは簡略化）
   const mergedStyle: ComponentStyle = {
@@ -51,9 +48,9 @@ export const getComponentStyle = (
   // 各ヘルパー関数を呼び出してスタイルオブジェクトを生成
   const color = getColorStyle(maps?.colorMap ?? defaultColorMap, mergedStyle.color);
   const size = getSizeStyle(maps?.sizeMap ?? defaultSizeMap, mergedStyle.size);
-  const round = getRoundStyle(maps?.roundMap ?? defaultRoundMap, mergedStyle.roundKey);
-  const shadow = getShadowStyle(maps?.shadowMap ?? defaultShadowMap, mergedStyle.shadowKey);
-  const fontWeight = getFontWeightStyle(maps?.fontWeightMap ?? defaultFontWeightMap, mergedStyle.fontWeightKey);
+  const round = maps?.roundMap ? getRoundStyle(maps?.roundMap, mergedStyle.roundKey) : undefined;
+  const shadow = maps?.shadowMap ? getShadowStyle(maps?.shadowMap, mergedStyle.shadowKey) : undefined;
+  const fontWeight = maps?.fontWeightMap ? getFontWeightStyle(maps?.fontWeightMap, mergedStyle.fontWeightKey) : undefined;
 
   // StyleSheet.flattenで全てのスタイルオブジェクトを一つにまとめる
   return StyleSheet.flatten([color, size, round, shadow, fontWeight]);

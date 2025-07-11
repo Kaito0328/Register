@@ -7,6 +7,7 @@ import { RoundKey } from '@/style/rounded';
 import { ComponentStyle, getComponentStyle, PartialComponentStyle } from '@/style/style';
 import { useTheme } from '@react-navigation/native';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { getTextStyle } from '@/style/textStyle';
 
 // TextInputのデフォルトの見た目を定義
 const defaultStyle: ComponentStyle = {
@@ -32,7 +33,7 @@ const theme = useThemeColor();
   // ★フォーカスされているかどうかをstateで管理
   const [isFocused, setIsFocused] = useState(false);
 
-    const themedStyle = getComponentStyle(defaultStyle, styleKit);
+    const themedStyle = getTextStyle(defaultStyle, styleKit);
 
   // --- End of Style Logic ---
   
