@@ -1,24 +1,47 @@
 import React from 'react';
-import { type PressableProps } from 'react-native';
-import { BasePressable, type BasePressableProps } from '../base/BasePressable';
-import { BaseText, type BaseTextProps } from '../base/BaseText';
-import { CoreColorKey, ColorPropertyKey } from '@/style/color';
-import { FontWeightKey } from '@/style/fontWeight';
-import { BaseButton } from '../base/BaseButton';
+import { View, StyleSheet } from 'react-native';
+import { BasePressable } from '../base/BasePressable';
+import { BaseText } from '../base/BaseText';
+import { CoreColorKey } from '@/style/color';
+import { DeleteButton } from '../editor/DeleteButton';
 
-// Buttonが受け取るpropsの型を定義
 type Props = {
-    onPress: () => void;
-    title: string;
+  onPress: () => void;
+  onDelete: () => void; // ★ onDelete propを追加
+  title: string;
 };
 
-export const MemoItem: React.FC<Props> = ({
-    onPress,
-    title
-}) => {
+export const MemoItem: React.FC<Props> = ({ onPress, onDelete, title }) => {
   return (
-    <BaseButton onPress={onPress} pressableStyleKit={{color: {colorKey: CoreColorKey.Base, not_bg: true}}}>
-        {title}
-    </BaseButton>
+    <View style={styles.container}>
+      {/* ノートタイトル部分（押したら編集画面へ） */}
+      <BasePressable onPress={onPress} style={styles.pressableArea}>
+        <BaseText styleKit={{ color: { colorKey: CoreColorKey.Base } }} numberOfLines={1}>
+          {title}
+        </BaseText>
+      </BasePressable>
+
+      {/* 削除ボタン */}
+      <View style={styles.deleteButtonWrapper}>
+        <DeleteButton onPress={onDelete} />
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginVertical: 4,
+  },
+  pressableArea: {
+    flex: 1, // タイトル部分が可能な限り幅を取るように
+    paddingVertical: 12,
+  },
+  deleteButtonWrapper: {
+    marginLeft: 8,
+  },
+});
