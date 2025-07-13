@@ -1,12 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // ★ インポート
+import { LifecycleUnit, NoteLifecycle, type Note } from '@/types/Note'; 
 
-export type Note = {
-  id: string;
-  text: string;
-  title?: string;
-  createdAt: number;
-};
 
 // ★ ストレージに保存するためのキーを定義
 const STORAGE_KEY = 'notes';
@@ -14,6 +9,19 @@ const STORAGE_KEY = 'notes';
 export const useNotes = () => {
   // ★ 初期状態は空の配列にする
   const [notes, setNotes] = useState<Note[]>([]);
+
+  const saveNotesToStorage = useCallback(async () => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      console.log('Notes saved successfully.', notes);
+    } catch (e) {
+      console.error('Failed to save notes.', e);
+    }
+  }, [notes]);
+
+    useEffect(() => {
+      saveNotesToStorage();
+  }, [notes]);
 
   // ★ 1. アプリ起動時にデータを読み込む処理
   useEffect(() => {
@@ -44,15 +52,18 @@ export const useNotes = () => {
     if (notes.length > 0) {
       saveNotes();
     }
-  }, [notes]); // notesが変更されるたびに実行
+  }, [notes]); 
 
   const createNote = useCallback((text: string): Note => {
+    const now = Date.now();
     const newNote: Note = {
-      // ID生成ロジックをより堅牢なものに変更
-      id: Date.now().toString(),
+      id: now.toString(),
       text,
-      title: text.split('\n')[0].slice(0, 20) || '無題のメモ',
-      createdAt: Date.now(),
+      title: '無題のメモ',
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false, // ★ 追加
+      lifecycle: { unit: LifecycleUnit.Forever, value: null },
     };
     setNotes((prev) => [newNote, ...prev]);
     return newNote;
@@ -63,10 +74,10 @@ export const useNotes = () => {
     return notes.find((note) => note.id === id);
   }, [notes]);
 
-  const updateNote = useCallback((id: string, text?: string, title?: string) => {
+  const updateNote = useCallback((id: string, updateNote: Partial<Note>) => {
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === id ? { ...note, text: text || note.text, title: title || note.title || text?.split('\n')[0].slice(0, 20) } : note
+        note.id === id ? { ...note, ...updateNote, updatedAt: Date.now() } : note
       )
     );
   }, []);
@@ -76,5 +87,13 @@ export const useNotes = () => {
     setNotes((prev) => prev.filter((note) => note.id !== id));
   }, []);
 
-  return { notes, createNote, findNoteById, updateNote, deleteNote };
+    const togglePin = useCallback((id: string) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, isPinned: !note.isPinned } : note
+      )
+    );
+  }, []);
+
+  return { notes, createNote, findNoteById, updateNote, deleteNote, togglePin};
 };

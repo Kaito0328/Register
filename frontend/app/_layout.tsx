@@ -4,8 +4,9 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { getComponentStyle } from "@/style/style";
 import { CoreColorKey, ColorPropertyKey } from "@/style/color";
 import { SizeKey, SizeProperty } from "@/style/size";
-import DrawerContent from "@/components/layout/DrawerContent";
+import DrawerContent from "@/components/sideMenu/DrawerContent";
 import { NotesProvider } from "@/contexts/NotesContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 
 export default function RootLayout() {
 
@@ -16,6 +17,7 @@ export default function RootLayout() {
 
   return (
           <NotesProvider>
+            <SettingsProvider>
     <Drawer
       // ★ハンバーガーメニューの中身をカスタムコンポーネントで描画
       drawerContent={(props) => <DrawerContent {...props} />}
@@ -52,6 +54,7 @@ export default function RootLayout() {
       <Drawer.Screen name="note/[id]" options={{ drawerItemStyle: { display: 'none' } }} />
 
     </Drawer>
+    </SettingsProvider>
     </NotesProvider>
   );
 }

@@ -4,15 +4,15 @@ import { useNotes } from '@/contexts/NotesContext';
 import { BaseText } from '@/components/base/BaseText';
 import { CoreColorKey } from '@/style/color';
 import { router } from 'expo-router';
-import { CreateMemoButton } from '../sideMenu/CreateMemoButton';
-import { MemoItem } from '../sideMenu/MemoItem';
+import { CreateMemoButton } from './CreateMemoButton';
+import { MemoItem } from './MemoItem';
 import { BaseView } from '../base/BaseView';
-import { defaultColorMap } from '@/styleMap/defaults/defaultColorMap';
-import { useTheme } from '@react-navigation/native';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BaseButton } from '../base/BaseButton';
 
 export default function DrawerContent(props: any) {
   const { notes, createNote, deleteNote } = useNotes();
+    const insets = useSafeAreaInsets();
 
   const handleCreateNote = () => {
     const newNote = createNote('');
@@ -20,10 +20,17 @@ export default function DrawerContent(props: any) {
     props.navigation.closeDrawer();
   };
 
+  
+  const navigateToSettings = () => {
+    router.push('/settings');
+    props.navigation.closeDrawer();
+  };
+
+
   // ★ 1. SafeAreaViewを一番外側にして、背景色もここに適用
   return (
     <BaseView style={{flex: 1}}>
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* --- ヘッダー部分（固定） --- */}
       <BaseText style={styles.listHeader} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>ノート一覧</BaseText>
       <BaseView style={styles.divider} styleKit={{ color: { colorKey: CoreColorKey.Primary } }} />
@@ -45,6 +52,14 @@ export default function DrawerContent(props: any) {
           />
         ))}
       </ScrollView>
+            <BaseView style={styles.footer}>
+        <BaseButton 
+          onPress={navigateToSettings}
+          pressableStyleKit={{color: {colorKey: CoreColorKey.Base, not_bg: true}}}
+        >
+          設定
+        </BaseButton>
+      </BaseView>
     </SafeAreaView>
     </BaseView>
   );
@@ -63,5 +78,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10
+  },
+    footer: {
+    borderTopWidth: 1,
+    borderColor: '#e0e0e0',
+    padding: 8,
   }
 });

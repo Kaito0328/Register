@@ -15,7 +15,7 @@ export const MemoItem: React.FC<Props> = ({ onPress, onDelete, title }) => {
   return (
     <View style={styles.container}>
       {/* ノートタイトル部分（押したら編集画面へ） */}
-      <BasePressable onPress={onPress} style={styles.pressableArea}>
+      <BasePressable onPress={onPress} style={styles.pressableArea} styleKit={{ color: { colorKey: CoreColorKey.Secondary, not_bg: true} }}>
         <BaseText styleKit={{ color: { colorKey: CoreColorKey.Base } }} numberOfLines={1}>
           {title}
         </BaseText>

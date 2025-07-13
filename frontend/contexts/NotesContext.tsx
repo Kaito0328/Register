@@ -1,13 +1,15 @@
 import React, { createContext, useContext } from 'react';
-import { useNotes as useNotesHook, type Note } from '@/hooks/useNotes';
+import { useNotes as useNotesHook} from '@/hooks/useNotes';
+import { Note } from '@/types/Note';
 
 // Contextに渡す値の型を定義
 type NotesContextType = {
   notes: Note[];
   createNote: (text: string) => Note;
   findNoteById: (id: string | undefined) => Note | undefined;
-  updateNote: (id: string, text?: string, title?: string) => void;
+  updateNote: (id: string, updateNote: Partial<Note>) => void;
   deleteNote: (id: string) => void;
+  togglePin: (id: string) => void;
 };
 
 // Contextを作成。初期値はundefinedでOK
