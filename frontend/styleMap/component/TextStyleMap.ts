@@ -1,31 +1,28 @@
 import { defaultColorMap } from '../defaults/defaultColorMap';
-import { CoreColorKey } from '@/style/color';
+import { CoreColorKey, ThemeColor } from '@/style/color';
 import type { ColorThemeMap } from '@/style/color';
 
-// --- ライトモード ---
-const lightText: ColorThemeMap = {
-  ...defaultColorMap.light,
-  // BaseText用にSecondaryキーの役割を「サブテキスト色」として明確化
-  [CoreColorKey.Secondary]: {
-    text: { default: { color: '#8A8A8E' } },
-  },
-};
 
-// --- ダークモード ---
-const darkText: ColorThemeMap = {
-  ...defaultColorMap.dark,
-  [CoreColorKey.Secondary]: {
-    text: { default: { color: '#8A8A8E' } },
-  },
+
+const createTextColorMap = (theme: ColorThemeMap): ColorThemeMap => {
+  const newTheme = deepCopy(theme);
+  for (const key in newTheme) {
+    const typedKey = key as keyof ColorThemeMap;
+    // bgとborderを削除
+    delete newTheme[typedKey].bg;
+    delete newTheme[typedKey].border;
+  }
+  return newTheme;
 };
 
 export const textColorMap = {
-  light: lightText,
-  dark: darkText,
+  light: createTextColorMap(defaultColorMap.light),
+  dark: createTextColorMap(defaultColorMap.dark),
 };
 
 import { defaultSizeMap } from '../defaults/defaultSizeMap';
 import { defaultFontWeightMap } from '../defaults/defaultFontWeightMap';
+import { deepCopy } from '@/utils/utils';
 
 // BaseTextはシャドウや角丸を持たないため、マップを限定します。
 export const textStyleMaps = {

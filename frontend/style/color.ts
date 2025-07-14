@@ -1,5 +1,5 @@
 import { useThemeColor } from '@/hooks/useThemeColor';
-import type { ViewStyle, TextStyle } from 'react-native';
+import type { ViewStyle, TextStyle, ColorValue } from 'react-native';
 
 // --- React Native用に型定義を翻訳 ---
 
@@ -31,17 +31,20 @@ export enum ColorPropertyKey {
   // RingはRNに無いため省略
 }
 
+export enum ColorState {
+  Default = 'default',
+  Active = 'active',
+  Loading = 'loading',
+  Focus = 'focus', // TextInput用
+  Placeholder = 'placeholder', // TextInput用
+}
+
 // 各状態が持つのは、クラス名ではなくスタイルオブジェクト
-export type ColorStateStyles = {
-  default: StyleObject;
-  active?: StyleObject; // 押下時
-  focus?: StyleObject;  // TextInput用
-  loading?: StyleObject;
-};
+export type ColorStateStyles = Partial<Record<ColorState, StyleObject>>;
 
 export enum ThemeColor {
-  light = 'light',
-  dark = 'dark',
+  Light = 'light',
+  Dark = 'dark',
 }
 
 // 各プロパティが持つのは、状態ごとのスタイルオブジェクト
@@ -95,3 +98,13 @@ export const getColorStyle = (
   }
   return combinedStyle;
 };
+
+export const getPlaceholderColor = (
+    map: ColorMap,
+    colorKey: CoreColorKey,
+): ColorValue | undefined => {
+    const themeColor = useThemeColor();
+    const themeMap = map[themeColor];
+    // BaseTextInput用のマップから、指定されたキーのplaceholder色を取得
+    return themeMap[colorKey]?.text?.placeholder?.color;
+}

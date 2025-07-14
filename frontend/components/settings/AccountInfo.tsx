@@ -7,7 +7,6 @@ import { BaseView } from '../base/BaseView';
 export const AccountInfo: React.FC = () => {
   return (
     <BaseView style={styles.container}>
-      {/* ダミーのアイコン */}
       <View style={styles.avatar} /> 
       <View>
         <BaseText style={styles.name}>ゲストユーザー</BaseText>

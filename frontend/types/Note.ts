@@ -9,10 +9,7 @@ export type Note = {
    */
   isPinned: boolean;
   /**
-   * ノートの自動削除設定
-   * 'forever': 自動で削除しない
-   * '30days': 30日後に削除
-   * '90days': 90日後に削除
+   * ノートのライフサイクル設定
    */
   lifecycle: NoteLifecycle;
 };

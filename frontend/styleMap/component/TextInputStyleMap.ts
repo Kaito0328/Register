@@ -2,55 +2,38 @@ import { defaultColorMap } from '../defaults/defaultColorMap';
 import { CoreColorKey } from '@/style/color';
 import type { ColorThemeMap } from '@/style/color';
 
-// --- ライトモード ---
-// defaultColorMapをディープコピーして、安全に変更できるようにする
-const lightInput: ColorThemeMap = JSON.parse(
-  JSON.stringify(defaultColorMap.light)
-);
+const createTextInputColorMap = (theme: ColorThemeMap): ColorThemeMap => {
+  const newTheme = deepCopy(theme);
 
-// Baseキーのborderスタイルを取得（存在しない場合は空のオブジェクトをデフォルトにする）
-const lightBaseBorder = lightInput[CoreColorKey.Base].border ?? { default: {} };
+  // Base（入力欄の通常時）のスタイルを調整
+  newTheme[CoreColorKey.Base] = {
+    // 背景色は少し目立つように、Secondaryの背景色を借用
+    bg: { default: theme[CoreColorKey.Secondary].bg!.default },
+    // テキスト色はBaseのまま
+    text: { default: theme[CoreColorKey.Base].text!.default },
+    // 枠線もSecondaryの色を借用
+    border: { default: theme[CoreColorKey.Secondary].border!.default },
+  };
 
-// 新しいborderスタイルを構築
-lightInput[CoreColorKey.Base].border = {
-  // 元のスタイル（default, active, loading）はそのまま維持する
-  ...lightBaseBorder,
-  // focus時のスタイルを上書きまたは追加する
-  focus: { borderColor: '#BCCF82' },
+  // Primary（フォーカス時や有効時）のスタイルを調整
+  // コンポーネント側でisFocusedの時にPrimaryを参照することを想定
+  newTheme[CoreColorKey.Primary] = {
+    ...newTheme[CoreColorKey.Primary],
+    // フォーカス時の枠線としてPrimaryのボーダー色を使う
+    border: { default: theme[CoreColorKey.Primary].border!.default },
+  };
+
+  return newTheme;
 };
 
-// TextInputの背景は常に白にするなど、独自のルールを追加
-lightInput[CoreColorKey.Base].bg = {
-  default: { backgroundColor: '#FFFFFF' },
-};
-
-
-// --- ダークモード ---
-const darkInput: ColorThemeMap = JSON.parse(
-  JSON.stringify(defaultColorMap.dark)
-);
-
-const darkBaseBorder = darkInput[CoreColorKey.Base].border ?? { default: {} };
-
-darkInput[CoreColorKey.Base].border = {
-  ...darkBaseBorder,
-  focus: { borderColor: '#BCCF82' },
-};
-
-darkInput[CoreColorKey.Base].bg = {
-  default: { backgroundColor: '#2C2C2E' },
-};
-
-
-// --- 最終的なエクスポート ---
 export const textInputColorMap = {
-  light: lightInput,
-  dark: darkInput,
+  light: createTextInputColorMap(defaultColorMap.light),
+  dark: createTextInputColorMap(defaultColorMap.dark),
 };
-
 import { defaultSizeMap } from '../defaults/defaultSizeMap';
 import { defaultRoundMap } from '../defaults/defaultRoundMap';
 import { defaultFontWeightMap } from '../defaults/defaultFontWeightMap';
+import { deepCopy } from '@/utils/utils';
 
 export const textInputStyleMaps = {
   colorMap: textInputColorMap,

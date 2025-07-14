@@ -22,7 +22,6 @@ export const LifecycleSettingsModal: React.FC<Props> = ({ visible, onClose, onSa
     if (unit === LifecycleUnit.Forever || unit === LifecycleUnit.Today) {
       finalValue = null;
     } else if (isNaN(finalValue) || finalValue <= 0) {
-      // 不正な値の場合は何もしないか、エラー表示
       return;
     }
     onSave({ unit, value: finalValue });
