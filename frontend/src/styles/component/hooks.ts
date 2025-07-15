@@ -77,33 +77,33 @@ export const useTextStyles = (
     return finalStyles;
   }, [colorStyles, sizeStyles, fontWeightStyle]);
 };
-
-// 状態の優先順位リスト（defaultは含めない）
 const statePriority: NonDefaultStates[] = [
-  StyleState.Disabled,
-  StyleState.LongPressed,
-  StyleState.Pressed,
-  StyleState.Focus,
+  StyleState.Disabled,
+  StyleState.LongPressed,
+  StyleState.Pressed,
+  StyleState.Focus,
 ];
 
-export const useResolvedStyle = <T extends ViewStyle | TextStyle>(
-  styles: Partial<Record<StyleState, T>>,
-  stateFlags: StateFlags
+/**
+ * 状態に応じて適用すべきスタイルを解決する関数
+ * @param styles 各状態に対応するスタイル定義
+ * @param stateFlags 現在の状態フラグ
+ * @returns 解決された最終的なスタイルオブジェクト
+ */
+export const resolveStyle = <T extends ViewStyle | TextStyle>(
+  styles: Partial<Record<StyleState, T>>,
+  stateFlags: StateFlags
 ): T => {
-  return useMemo(() => {
-    // 1. ベースとしてdefaultスタイルを適用
-    const stylesToMerge: T[] = [styles.default ?? ({} as T)];
+  // 1. ベースとしてdefaultスタイルを適用
+  const stylesToMerge: T[] = [styles.default ?? ({} as T)];
 
-    // 2. 優先順位に従って、有効な状態のスタイルを配列に追加
-    for (const state of statePriority) {
-      // stateFlagsがtrueで、かつ対応するスタイル定義が存在する場合
-      if (stateFlags[state] && styles[state]) {
-        stylesToMerge.push(styles[state]);
-      }
-    }
+  // 2. 優先順位に従って、有効な状態のスタイルを配列に追加
+  for (const state of statePriority) {
+    if (stateFlags[state] && styles[state]) {
+      stylesToMerge.push(styles[state]);
+    }
+  }
 
-    // 3. 全てのスタイルを一つのオブジェクトにマージする
-    // 配列の後ろのスタイルが前のスタイルを上書きします
-    return StyleSheet.flatten(stylesToMerge) as T;
-  }, [styles, stateFlags]);
+  // 3. 全てのスタイルを一つのオブジェクトにマージして返す
+  return StyleSheet.flatten(stylesToMerge) as T;
 };

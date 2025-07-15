@@ -1,4 +1,4 @@
-import { PartialTextStyleKit, StateFlags, TextStyleKit, textStyleMaps, useResolvedStyle, useTextStyles } from "@/styles/component";
+import { PartialTextStyleKit, StateFlags, TextStyleKit, textStyleMaps, resolveStyle, useTextStyles } from "@/styles/component";
 import { ColorTextProperty, CoreColorKey, FontWeightKey, SizeKey, SizeTextProperty } from "@/styles/tokens";
 import { Text, TextProps } from "react-native";
 
@@ -35,7 +35,7 @@ export const BaseText: React.FC<BaseTextProps> = ({
   const stateFlags: StateFlags = {
     disabled: disabled ?? false,
   };
-  const resolvedStyle = useResolvedStyle(textStyles, stateFlags);
+  const resolvedStyle = resolveStyle(textStyles, stateFlags);
 
   // Textのインポート元を 'react-native' に修正したことでエラーが解決
   return <Text style={[resolvedStyle, style]} {...props} />;

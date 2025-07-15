@@ -3,8 +3,8 @@ import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { BaseView } from '@/base/BaseView';
 import { BaseTextInput } from '@/base/BaseTextInput';
 import { CoreColorKey } from '@/styles/tokens/color';
-import { SizeKey } from '@/styles/tokens/size';
-import { RoundKey } from '@/styles/tokens';
+import { SizeKey, SizeTextProperty, SizeViewProperty } from '@/styles/tokens/size';
+import { RoundKey, ShadowKey } from '@/styles/tokens';
 
 type NoteEditorProps = {
   text: string;
@@ -13,16 +13,15 @@ type NoteEditorProps = {
 
 export default function NoteEditor({ text, onChangeText }: NoteEditorProps) {
   return (
-    <BaseView styleKit={{ color: { colorKey: CoreColorKey.Secondary } }} style={styles.container}>
+    <BaseView styleKit={{ color: { colorKey: CoreColorKey.Secondary }, size: {sizeKey: SizeKey.LG, apply: {default: [SizeViewProperty.Padding]}}}} style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <BaseTextInput
-          easyStyleKit={{
-            sizeKey: SizeKey.LG ,
-            roundKey: RoundKey.Lg,
-          }}
+          viewStyleKit={{ size: {sizeKey: SizeKey.LG }, color: { colorKey: CoreColorKey.Secondary, apply: {default: []}}}}
+          textStyleKit={{ size: {sizeKey: SizeKey.LG }, color: { colorKey: CoreColorKey.Base } }}
+          
           style={styles.textInput}
           multiline
           placeholder="一時的なメモをここに..."
@@ -40,8 +39,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    margin: 16,
-    padding: 20,
     textAlignVertical: 'top',
   },
 });

@@ -3,6 +3,7 @@ import { ColorTextMap, ColorTextStyle, ColorTextStyleKit, ColorValueMap, ColorVa
 import { useMemo } from "react";
 import { NonDefaultStates, StateFlags, StyleState } from "../../component";
 import { ColorValue } from "react-native";
+import { useSettings } from "@/contexts/SettingsContext";
 
 /**
  * View用のスタイルを生成するカスタムフック
@@ -15,7 +16,7 @@ export function useColorViewStyle(
   kit: ColorViewStyleKit,
   map: ColorViewMap
 ): ColorViewStyle {
-  const { themeMode } = useThemeColor();
+  const { themeMode } = useSettings();
 
   const colorStyle = useMemo(() => {
     const { colorKey, apply } = kit;
@@ -65,7 +66,7 @@ export function useColorTextStyle(
   kit: ColorTextStyleKit,
   map: ColorTextMap
 ): ColorTextStyle {
-  const { themeMode } = useThemeColor();
+  const { themeMode } = useSettings();
 
   const colorStyle = useMemo(() => {
     const { colorKey, apply } = kit;
@@ -124,10 +125,10 @@ export const useResolvedColorValues = (
   map: ColorValueMap,
   stateFlags: StateFlags
 ): Partial<Record<ColorValueProperty, ColorValue>> => {
+  const { themeMode } = useSettings();
   return useMemo(() => {
     const { colorKey, apply } = kit;
     const resolvedValues: Partial<Record<ColorValueProperty, ColorValue>> = {};
-    const { themeMode } = useThemeColor();
     // 1. ベースとなる色の定義を取得
     const colorStateMap = map[themeMode]?.[colorKey]; // themeはuseThemeColor()から取得
     if (!colorStateMap) return {};

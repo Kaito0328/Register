@@ -6,34 +6,34 @@ export const defaultColorViewMap: ColorViewMap = {
   [ThemeMode.Light]: {
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#C4E4A5' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#BEEBBA' }, // 明るく鮮やかな黄緑
       },
     },
     [CoreColorKey.Secondary]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#F0F0F0' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#E6F5E6' }, // さらに薄い黄緑
       },
     },
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#FFFFFF' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#F8FCF8' }, // ほぼ白に近い緑がかった背景
       },
     },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#A8D88A' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#355338ff' }, // 【変更】少し明るめの深い緑に変更
       },
     },
     [CoreColorKey.Secondary]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#2C2C2E' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#495649ff' }, // 【変更】Primaryに合わせて少し明るく
       },
     },
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#1C1C1E' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#1d241dff' }, // 【変更】全体のトーンに合わせて少し明るく
       },
     },
   },
@@ -44,19 +44,19 @@ export const pressableColorViewMap: ColorViewMap = {
     [CoreColorKey.Primary]: {
       ...defaultColorViewMap[ThemeMode.Light][CoreColorKey.Primary],
       [StyleState.Pressed]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#A8D88A' }, // 少し濃く
+        [ColorViewProperty.Bg]: { backgroundColor: '#A8D8A4' }, // 少し濃く
       },
       [StyleState.Disabled]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#E8F0E8' }, // 無効色
+        [ColorViewProperty.Bg]: { backgroundColor: '#E0EAE0' }, // 無効色
       },
     },
     [CoreColorKey.Secondary]: {
       ...defaultColorViewMap[ThemeMode.Light][CoreColorKey.Secondary],
       [StyleState.Pressed]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#E0E0E0' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#D0E0D0' },
       },
       [StyleState.Disabled]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#F5F5F5' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' },
       },
     },
   },
@@ -64,19 +64,19 @@ export const pressableColorViewMap: ColorViewMap = {
     [CoreColorKey.Primary]: {
       ...defaultColorViewMap[ThemeMode.Dark][CoreColorKey.Primary],
       [StyleState.Pressed]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#C4E4A5' }, // 少し明るく
+        [ColorViewProperty.Bg]: { backgroundColor: '#5C9B56' }, // 【変更】新しいPrimaryより少し明るく
       },
       [StyleState.Disabled]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#2C2C2E' }, // 無効色
+        [ColorViewProperty.Bg]: { backgroundColor: '#3A5A3A' }, // 【変更】無効色のトーンを調整
       },
     },
     [CoreColorKey.Secondary]: {
       ...defaultColorViewMap[ThemeMode.Dark][CoreColorKey.Secondary],
       [StyleState.Pressed]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#3A3A3C' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#4A5B4A' }, // 【変更】新しいSecondaryに合わせて調整
       },
       [StyleState.Disabled]: {
-        [ColorViewProperty.Bg]: { backgroundColor: '#1C1C1E' },
+        [ColorViewProperty.Bg]: { backgroundColor: '#344034' }, // 【変更】無効色のトーンを調整
       },
     },
   },
@@ -84,19 +84,19 @@ export const pressableColorViewMap: ColorViewMap = {
 
 export const defaultColorTextMap: ColorTextMap = {
   [ThemeMode.Light]: {
-    // Primaryボタンの上の文字など、主要なアクションを示す文字色
+    // Primaryボタンの上の文字など
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorTextProperty.Text]: { color: '#3E4A3E' },
+        [ColorTextProperty.Text]: { color: '#2A3F2A' }, // 濃い緑がかったグレー
       },
     },
     // 基本的な文字色
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorTextProperty.Text]: { color: '#3E4A3E' },
+        [ColorTextProperty.Text]: { color: '#2A3F2A' }, // 濃い緑がかったグレー
       },
       [StyleState.Disabled]: {
-        [ColorTextProperty.Text]: { color: '#A8B0A8' },
+        [ColorTextProperty.Text]: { color: '#8A9A8A' }, // 薄い緑がかったグレー
       },
     },
     // エラーメッセージなど
@@ -109,15 +109,15 @@ export const defaultColorTextMap: ColorTextMap = {
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorTextProperty.Text]: { color: '#3E4A3E' },
+        [ColorTextProperty.Text]: { color: '#E8F5E9' }, // 【変更】背景に合わせて視認性の高い、より明るい色に
       },
     },
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorTextProperty.Text]: { color: '#E8F0E8' },
+        [ColorTextProperty.Text]: { color: '#E8F5E9' }, // 【変更】こちらも同様に明るく
       },
       [StyleState.Disabled]: {
-        [ColorTextProperty.Text]: { color: '#6E786E' },
+        [ColorTextProperty.Text]: { color: '#7A8A7A' }, // 【変更】背景に合わせて少し明るく
       },
     },
     [CoreColorKey.Danger]: {
@@ -132,32 +132,32 @@ export const defaultColorValueMap: ColorValueMap = {
   [ThemeMode.Light]: {
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorValueProperty.Icon]: '#3E4A3E',
+        [ColorValueProperty.Icon]: '#2A3F2A', // テキスト色と統一
       },
     },
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorValueProperty.Border]: '#D0D0D0',
-        [ColorValueProperty.Icon]: '#5E6B5E',
+        [ColorValueProperty.Border]: '#C0D0C0',
+        [ColorValueProperty.Icon]: '#4A5A4A',
       },
       [StyleState.Disabled]: {
-        [ColorValueProperty.Icon]: '#A8B0A8',
+        [ColorValueProperty.Icon]: '#8A9A8A', // テキスト無効色と統一
       },
     },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
       [StyleState.Default]: {
-        [ColorValueProperty.Icon]: '#3E4A3E',
+        [ColorValueProperty.Icon]: '#E8F5E9', // 【変更】テキスト色と統一
       },
     },
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
-        [ColorValueProperty.Border]: '#4A4A4E',
-        [ColorValueProperty.Icon]: '#B8C0B8',
+        [ColorValueProperty.Border]: '#5A6A5A', // 【変更】背景色との区別をしやすく
+        [ColorValueProperty.Icon]: '#C8D8C8',   // 【変更】背景に合わせて少し明るく
       },
       [StyleState.Disabled]: {
-        [ColorValueProperty.Icon]: '#6E786E',
+        [ColorValueProperty.Icon]: '#7A8A7A', // 【変更】テキスト無効色と統一
       },
     },
   },
@@ -169,14 +169,14 @@ export const textInputColorValueMap: ColorValueMap = {
       ...defaultColorValueMap[ThemeMode.Light][CoreColorKey.Base],
       [StyleState.Default]: {
         ...defaultColorValueMap[ThemeMode.Light][CoreColorKey.Base]?.[StyleState.Default],
-        [ColorValueProperty.Placeholder]: '#A8B0A8',
-        [ColorValueProperty.Selection]: '#C4E4A5', // PrimaryColor
+        [ColorValueProperty.Placeholder]: '#8A9A8A', // テキスト無効色と統一
+        [ColorValueProperty.Selection]: '#BEEBBA', // PrimaryColor
       },
       [StyleState.Focus]: {
-        [ColorValueProperty.Border]: '#A8D88A', // PrimaryColorの濃い方
+        [ColorValueProperty.Border]: '#A8D8A4', // PrimaryColorの濃い方
       },
       [StyleState.Disabled]: {
-        [ColorValueProperty.Border]: '#E0E0E0',
+        [ColorValueProperty.Border]: '#D0E0D0',
       },
     },
   },
@@ -185,14 +185,14 @@ export const textInputColorValueMap: ColorValueMap = {
       ...defaultColorValueMap[ThemeMode.Dark][CoreColorKey.Base],
       [StyleState.Default]: {
         ...defaultColorValueMap[ThemeMode.Dark][CoreColorKey.Base]?.[StyleState.Default],
-        [ColorValueProperty.Placeholder]: '#6E786E',
-        [ColorValueProperty.Selection]: '#A8D88A', // PrimaryColor
+        [ColorValueProperty.Placeholder]: '#7A8A7A', // 【変更】テキスト無効色と統一
+        [ColorValueProperty.Selection]: '#4A7B46',   // 【変更】新しいPrimaryColorに
       },
       [StyleState.Focus]: {
-        [ColorValueProperty.Border]: '#C4E4A5', // PrimaryColorの明るい方
+        [ColorValueProperty.Border]: '#5C9B56', // 【変更】PrimaryのPressed色と合わせて分かりやすく
       },
       [StyleState.Disabled]: {
-        [ColorValueProperty.Border]: '#3A3A3C',
+        [ColorValueProperty.Border]: '#4A5B4A', // 【変更】トーンを合わせて調整
       },
     },
   },

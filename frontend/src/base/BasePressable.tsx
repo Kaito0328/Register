@@ -1,4 +1,4 @@
-import { PartialViewStyleKit, pressableStyleMaps, StateFlags, useResolvedStyle, useViewStyles, ViewStyleKit } from "@/styles/component";
+import { PartialViewStyleKit, pressableStyleMaps, StateFlags, resolveStyle, useViewStyles, ViewStyleKit } from "@/styles/component";
 import { ColorViewProperty, CoreColorKey, RoundKey, ShadowKey, SizeKey, SizeViewProperty } from "@/styles/tokens";
 import { useCallback } from "react";
 import { Pressable, PressableProps, PressableStateCallbackType, StyleProp, ViewStyle } from "react-native";
@@ -50,7 +50,7 @@ export const BasePressable: React.FC<BasePressableProps> = ({
       };
 
       // 4. 現在の状態に応じたスタイルを解決
-      const resolvedStyle = useResolvedStyle(viewStyles, stateFlags);
+      const resolvedStyle = resolveStyle(viewStyles, stateFlags);
 
       // 5. 外部から渡されたstyleが関数であれば実行し、そうでなければそのまま使う
       const externalStyle =

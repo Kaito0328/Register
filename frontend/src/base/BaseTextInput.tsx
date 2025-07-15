@@ -1,5 +1,5 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { ExclusiveMuliStyleProps, ExclusiveStyleProps, PartialTextStyleKit, PartialViewStyleKit, StateFlags, StyleState, textInputTextStyleMaps, textInputViewStyleMaps, TextStyleKit, useResolvedStyle, useTextStyles, useViewStyles, ViewStyleKit } from "@/styles/component";
+import { ExclusiveMuliStyleProps, PartialTextStyleKit, PartialViewStyleKit, StateFlags, StyleState, textInputTextStyleMaps, textInputViewStyleMaps, TextStyleKit, resolveStyle, useTextStyles, useViewStyles, ViewStyleKit } from "@/styles/component";
 import { ColorTextProperty, ColorValueProperty, ColorValueStyleKit, ColorViewProperty, CoreColorKey, FontWeightKey, RoundKey, SizeKey, SizeTextProperty, SizeViewProperty, textInputColorValueMap, useResolvedColorValues } from "@/styles/tokens";
 import { useMemo, useState } from "react";
 import { StyleProp, StyleSheet, TextInput, TextInputProps, TextStyle } from "react-native";
@@ -92,11 +92,10 @@ const { themeMode } = useThemeColor();
   const textStyles = useTextStyles(DEFAULT_INPUT_TEXT_KIT, overrideTextKit, textInputTextStyleMaps);
   const colorValues = useResolvedColorValues(DEFAULT_INPUT_VALUE_KIT, textInputColorValueMap, stateFlags);
 
-  const resolvedViewStyle = useResolvedStyle(viewStyles, stateFlags);
-  const resolvedTextStyle = useResolvedStyle(textStyles, stateFlags);
+  const resolvedViewStyle = resolveStyle(viewStyles, stateFlags);
+  const resolvedTextStyle = resolveStyle(textStyles, stateFlags);
 
   const finalInputStyle = StyleSheet.flatten([
-    styles.base,
     resolvedViewStyle,
     resolvedTextStyle,
     { borderColor: colorValues.border },
@@ -116,9 +115,3 @@ const { themeMode } = useThemeColor();
     />
   );
 };
-
-const styles = StyleSheet.create({
-  base: {
-    borderWidth: 1,
-  },
-});

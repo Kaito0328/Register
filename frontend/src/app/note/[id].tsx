@@ -7,11 +7,12 @@ import { BaseView } from '@/base/BaseView';
 import { useNotes } from '@/contexts/NotesContext';
 import { BaseTextInput } from '@/base/BaseTextInput';
 import { SizeKey } from '@/styles/tokens/size';
-import { RoundKey } from '@/styles/tokens';
+import { ColorViewProperty, RoundKey, ShadowKey } from '@/styles/tokens';
 import { CoreColorKey } from '@/styles/tokens';
 import { NoteActionSheet } from '@/components/KebabMenu/NoteActionSheet';
 import { LifecycleSettingComponent } from '@/components/lifeCycleSettingHeader/LifeCycleSettingComponent';
 import { NoteLifecycle, LifecycleUnit } from '@/types/Note';
+import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
 
 export default function NoteDetailScreen() {
   const navigation = useNavigation();

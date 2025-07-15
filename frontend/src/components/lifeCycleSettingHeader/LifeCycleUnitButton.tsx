@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
   unitButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderWidth: 1,
-    // borderColorはpressableStyleKitで設定される想定
     borderRadius: 20,
     margin: 4,
   },
