@@ -43,7 +43,6 @@ export const useNotes = () => {
     const saveNotes = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-        console.log('Notes saved successfully.', notes);
       } catch (e) {
         console.error('Failed to save notes.', e);
       }
@@ -59,7 +58,7 @@ export const useNotes = () => {
     const newNote: Note = {
       id: now.toString(),
       text,
-      title: '無題のメモ',
+      title: '',
       createdAt: now,
       updatedAt: now,
       isPinned: false, // ★ 追加

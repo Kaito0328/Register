@@ -22,8 +22,7 @@ export default function NoteDetailScreen() {
   const [text, setText] = useState(note?.text || '');
   const [menuVisible, setMenuVisible] = useState(false);
   const [isLifecycleExpanded, setIsLifecycleExpanded] = useState(false);
-  const [lifecycle, setLifecycle] = useState<NoteLifecycle>(note?.lifecycle || { unit: SpecialLifeCycleUnit.Forever, value: null });
-  const latestState = useRef({ text, editableTitle });
+  const latestState = useRef({ text, editableTitle, noteText: note?.text, noteTitle: note?.title });
 
     // ★修正点: ヘッダーの高さを保存するためのstateを追加
   const [headerHeight, setHeaderHeight] = useState(60); // 初期値として妥当な値を設定
@@ -31,21 +30,44 @@ export default function NoteDetailScreen() {
   const handleToggleExpand = useCallback(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsLifecycleExpanded(prev => !prev);
+    }, []);
+
+  const handleSaveTextAndTitle = useCallback((overrideTitle?: string) => {
+    if (!note) return;
+    const { text: latestText, noteText, noteTitle } = latestState.current;
+    
+    // 引数で渡されたタイトルを優先し、なければrefの値を参照する
+    const titleToSave = overrideTitle ?? latestState.current.editableTitle;
+
+    if (latestText !== noteText || titleToSave !== noteTitle) {
+      updateNote(note.id, { text: latestText, title: titleToSave });
+    }
+  }, [note?.id, updateNote]);
+
+  const fixTitleIfEmpty = useCallback((): string | null => {
+    const { text, editableTitle } = latestState.current;
+
+    if (editableTitle.trim() === '') {
+      const newTitle = text.trim().substring(0, 20) || '無題のメモ';
+      setEditableTitle(newTitle);
+      return newTitle; // ★新しく生成したタイトルを返す
+    }
+    return null; // ★タイトルに変更がなければnullを返す
   }, []);
 
-  const handleSaveTextAndTitle = useCallback(() => {
-    if (!note) return;
-    const { text: latestText, editableTitle: latestTitle } = latestState.current;
-    if (latestText !== note.text || latestTitle !== note.title) {
-      updateNote(note.id, { text: latestText, title: latestTitle });
-    }
-  }, [note, updateNote]);
+const handleFinalSave = useCallback(() => {
+  console.log('Final save triggered');
+  // fixTitleIfEmpty から新しいタイトルを受け取る
+  const newTitle = fixTitleIfEmpty(); 
+  // 受け取ったタイトルを引数として渡す
+  handleSaveTextAndTitle(newTitle ?? undefined); 
+}, [handleSaveTextAndTitle, fixTitleIfEmpty]);
 
   const handleSaveLifecycle = useCallback((newLifecycle: NoteLifecycle) => {
     if (!note) return;
     const expiresAt = calculateExpiresAt(newLifecycle, note.createdAt);
     updateNote(note.id, { lifecycle: newLifecycle, expiresAt });
-  }, [note, updateNote, isLifecycleExpanded]);
+  }, [note?.id, updateNote, isLifecycleExpanded]);
 
   const handleDelete = () => {
     if (!note) return;
@@ -63,14 +85,30 @@ export default function NoteDetailScreen() {
     }
   };
 
+    const headerTitleComponent = useCallback(() => (
+    <BaseTextInput
+      value={editableTitle}
+      onChangeText={setEditableTitle}
+      viewStyleKit={{ color: { colorKey: CoreColorKey.Primary }, size: { sizeKey: SizeKey.LG }, roundKey: RoundKey.None }}
+      style={{ textAlign: 'center', width: 200 }}
+      placeholder="タイトル"
+    />
+  ), [editableTitle, setEditableTitle]);
+
+  const headerRightComponent = useCallback(() => (
+    <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ paddingHorizontal: 16 }}>
+      <BaseText style={{ fontSize: 24, fontWeight: 'bold' }}>...</BaseText>
+    </TouchableOpacity>
+  ), [setMenuVisible]);
+
   // --- Effects (ここも変更なし) ---
   useEffect(() => {
-    latestState.current = { text, editableTitle };
-  }, [text, editableTitle]);
+    latestState.current = { text, editableTitle, noteText: note?.text, noteTitle: note?.title };
+  }, [text, editableTitle, note]);
 
   useEffect(() => {
     if (note) {
-      setEditableTitle(note.title || '無題のメモ');
+      setEditableTitle(note.title);
       setText(note.text || '');
     }
   }, [note]);
@@ -78,14 +116,16 @@ export default function NoteDetailScreen() {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState.match(/inactive|background/)) {
-        handleSaveTextAndTitle();
+        console.log('App is going to background, saving note...');
+        handleFinalSave();
       }
     });
     return () => {
       subscription.remove();
-      handleSaveTextAndTitle();
+      console.log('AppState listener removed');
+      handleFinalSave();
     };
-  }, [handleSaveTextAndTitle]);
+  }, [handleFinalSave]);
   
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -95,25 +135,13 @@ export default function NoteDetailScreen() {
   }, [text, editableTitle, handleSaveTextAndTitle]);
 
   useLayoutEffect(() => {
-    if (note) {
-      navigation.setOptions({
-        headerTitle: () => (
-          <BaseTextInput
-            value={editableTitle}
-            onChangeText={setEditableTitle}
-            viewStyleKit={{ color: { colorKey: CoreColorKey.Primary }, size: { sizeKey: SizeKey.LG }, roundKey: RoundKey.Lg }}
-            style={{ textAlign: 'center', width: 200 }}
-            placeholder="タイトル"
-          />
-        ),
-        headerRight: () => (
-          <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ paddingHorizontal: 16 }}>
-            <BaseText style={{ fontSize: 24, fontWeight: 'bold' }}>...</BaseText>
-          </TouchableOpacity>
-        ),
-      });
-    }
-  }, [navigation, note, editableTitle]);
+    if (!note) return;
+
+    navigation.setOptions({
+      headerTitle: headerTitleComponent,
+      headerRight: headerRightComponent,
+    });
+  }, [navigation, note, headerTitleComponent, headerRightComponent]);
 
   // --- Render ---
 if (!note) {

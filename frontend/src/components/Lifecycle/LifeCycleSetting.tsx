@@ -1,6 +1,6 @@
 import { BaseView } from "@/base/BaseView";
 import { LifecycleUnit, Note, NoteLifecycle, SpecialLifeCycleUnit, TimeUnit } from "@/types/Note";
-import { useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { LayoutAnimation, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LifecycleDisplay } from "./LifecycleDisplay";
 import { LifecycleEditor } from "./LifeCycleEditor";
@@ -9,7 +9,7 @@ import { BaseIcon } from "@/base/BaseIcon";
 import { CoreColorKey, SizeKey } from "@/styles/tokens";
 import { ComponentStatus } from "@/types/ComponentStatus";
 import { StatusMessage } from "../StatusMessage/StatusMessage";
-import { getErrorMessage, isValidLifecycle } from "@/utils/LifeCycleUtils";
+import { getErrorMessage, isTimeUnit, isValidLifecycle } from "@/utils/LifeCycleUtils";
 
 type SettingProps = {
   note: Note;
@@ -27,6 +27,7 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
   const [lifecycle, setLifecycle] = useState<NoteLifecycle>(note.lifecycle);
     const [error, setError] = useState<string>('');
     const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
+      const debounceTimer = useRef<number | null>(null);
   
   const handleToggleExpand = () => {
     if (isExpanded) {
@@ -38,28 +39,51 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
 
   const handleSelectSpecialUnit = (unit: SpecialLifeCycleUnit) => {
     setLifecycle({ unit, value: null });
-    onLifecycleChange({ unit, value: null });
+    handleSaveLifecycle({ unit, value: null });
   };
   
-  const handleSaveTimeUnit = (value: string, unit: TimeUnit) => {
-      const finalValue = value === '' ? null : parseInt(value, 10);
-      const lifecycleToSave: NoteLifecycle = { unit, value: finalValue };
-
-      if  (note.lifecycle.unit === unit && note.lifecycle.value === finalValue) return;
-
-      if (isValidLifecycle(lifecycleToSave)) {
+  const handleSaveLifecycle = (lifecycle: NoteLifecycle) => {
+      if (isValidLifecycle(lifecycle)) {
         setSaveStatus(ComponentStatus.Loading);
         setTimeout(() => {
-          onLifecycleChange(lifecycleToSave);
+          onLifecycleChange(lifecycle);
           setSaveStatus(ComponentStatus.Success);
           setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
         }, 500);
       } else {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setError(getErrorMessage(unit));
+        setError(getErrorMessage(lifecycle.unit));
         setSaveStatus(ComponentStatus.Error);
+        if (!isExpanded) {
+          setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
+        }
       }
     };
+
+  useEffect(() => {
+    
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setError('');
+    setSaveStatus(ComponentStatus.Idle);
+    if (!isTimeUnit(lifecycle.unit)) return;
+
+    debounceTimer.current = setTimeout(() => {
+      handleSaveLifecycle(lifecycle);
+    }, 1500);
+
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+  }, [lifecycle]);
+
+    useEffect(() => {
+      console.log('LifecycleSetting: isExpanded changed', isExpanded);
+      if (!isExpanded && isTimeUnit(lifecycle.unit)) {
+        if (debounceTimer.current) {
+          clearTimeout(debounceTimer.current);
+        }
+        console.log('LifecycleSetting: Saving lifecycle on collapse', lifecycle);
+        handleSaveLifecycle(lifecycle);
+      }
+    }, [isExpanded]);
 
   return (
     <View>
@@ -88,9 +112,8 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
 
         {isExpanded && (
           <LifecycleEditor
-            currentLifecycle={lifecycle}
-            handleSaveTimeUnit={handleSaveTimeUnit}
-            handleSelectTimeUnit={setLifecycle}
+            lifecycle={lifecycle}
+            setLifecycle={setLifecycle}
           />
         )}
       <StatusMessage
