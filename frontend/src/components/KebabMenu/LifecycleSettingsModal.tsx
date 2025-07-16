@@ -3,7 +3,7 @@ import { View, Modal, StyleSheet, TouchableOpacity, Pressable } from 'react-nati
 import { BaseText } from '../../base/BaseText';
 import { BaseTextInput } from '../../base/BaseTextInput';
 import { Button } from '../Button';
-import { NoteLifecycle, LifecycleUnit } from '@/types/Note';
+import { NoteLifecycle, LifecycleUnit, SpecialLifeCycleUnit, TimeUnit } from '@/types/Note';
 import { CoreColorKey } from '@/styles/tokens/color';
 
 type Props = {
@@ -19,7 +19,7 @@ export const LifecycleSettingsModal: React.FC<Props> = ({ visible, onClose, onSa
 
   const handleSave = () => {
     let finalValue: number | null = parseInt(value, 10);
-    if (unit === LifecycleUnit.Forever || unit === LifecycleUnit.Today) {
+    if (unit === SpecialLifeCycleUnit.Forever || unit === SpecialLifeCycleUnit.Today) {
       finalValue = null;
     } else if (isNaN(finalValue) || finalValue <= 0) {
       return;
@@ -53,8 +53,8 @@ export const LifecycleSettingsModal: React.FC<Props> = ({ visible, onClose, onSa
           <BaseText style={styles.title} styleKit={{color: {colorKey: CoreColorKey.Primary}}}>ライフサイクル設定</BaseText>
 
           <View style={styles.presetContainer}>
-            {renderUnitButton(LifecycleUnit.Forever, "無期限")}
-            {renderUnitButton(LifecycleUnit.Today, "今日の終わりまで")}
+            {renderUnitButton(SpecialLifeCycleUnit.Forever, "無期限")}
+            {renderUnitButton(SpecialLifeCycleUnit.Today, "今日の終わりまで")}
           </View>
 
           <View style={styles.customContainer}>
@@ -64,13 +64,13 @@ export const LifecycleSettingsModal: React.FC<Props> = ({ visible, onClose, onSa
               onChangeText={setValue}
               keyboardType="number-pad"
               placeholder="期間"
-              editable={unit !== LifecycleUnit.Forever && unit !== LifecycleUnit.Today}
+              editable={unit !== SpecialLifeCycleUnit.Forever && unit !== SpecialLifeCycleUnit.Today}
             />
             <View style={styles.unitSelector}>
-              {renderUnitButton(LifecycleUnit.Hour, "時間")}
-              {renderUnitButton(LifecycleUnit.Day, "日")}
-              {renderUnitButton(LifecycleUnit.Month, "月")}
-              {renderUnitButton(LifecycleUnit.Year, "年")}
+              {renderUnitButton(TimeUnit.Hour, "時間")}
+              {renderUnitButton(TimeUnit.Day, "日")}
+              {renderUnitButton(TimeUnit.Month, "月")}
+              {renderUnitButton(TimeUnit.Year, "年")}
             </View>
           </View>
 

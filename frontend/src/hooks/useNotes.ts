@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // ★ インポート
-import { LifecycleUnit, NoteLifecycle, type Note } from '@/types/Note'; 
+import { LifecycleUnit, NoteLifecycle, SpecialLifeCycleUnit, type Note } from '@/types/Note'; 
 
 
 // ★ ストレージに保存するためのキーを定義
@@ -63,7 +63,8 @@ export const useNotes = () => {
       createdAt: now,
       updatedAt: now,
       isPinned: false, // ★ 追加
-      lifecycle: { unit: LifecycleUnit.Forever, value: null },
+      lifecycle: { unit: SpecialLifeCycleUnit.Forever, value: null },
+      expiresAt: null, // ★ 追加
     };
     setNotes((prev) => [newNote, ...prev]);
     return newNote;

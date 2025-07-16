@@ -1,6 +1,7 @@
 import { RoundKey, RoundMap } from './types';
 
 export const defaultRoundMap: RoundMap = {
+  [RoundKey.None]: 0, // 角丸なし
   // 小さな角丸
   [RoundKey.Sm]: 6,
   // 標準的な角丸

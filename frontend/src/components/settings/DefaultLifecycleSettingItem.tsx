@@ -4,24 +4,24 @@ import { BaseText } from '../../base/BaseText';
 import { useSettings } from '@/contexts/SettingsContext';
 import { LifecycleSettingsModal } from '../KebabMenu/LifecycleSettingsModal';
 import type { NoteLifecycle } from '@/types/Note';
-import { LifecycleUnit } from '@/types/Note';
+import { LifecycleUnit, SpecialLifeCycleUnit, TimeUnit } from '@/types/Note';
 
 /**
  * ライフサイクルオブジェクトを人間が読める文字列に変換するヘルパー関数
  */
 const formatLifecycle = (lifecycle: NoteLifecycle): string => {
   switch (lifecycle.unit) {
-    case LifecycleUnit.Forever:
+    case SpecialLifeCycleUnit.Forever:
       return "無期限";
-    case LifecycleUnit.Today:
+    case SpecialLifeCycleUnit.Today:
       return "今日の終わりまで";
-    case LifecycleUnit.Hour:
+    case TimeUnit.Hour:
       return `${lifecycle.value} 時間`;
-    case LifecycleUnit.Day:
+    case TimeUnit.Day:
       return `${lifecycle.value} 日`;
-    case LifecycleUnit.Month:
+    case TimeUnit.Month:
       return `${lifecycle.value} ヶ月`;
-    case LifecycleUnit.Year:
+    case TimeUnit.Year:
       return `${lifecycle.value} 年`;
     default:
       return "未設定";

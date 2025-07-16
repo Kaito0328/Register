@@ -1,5 +1,5 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { ColorTextMap, ColorTextStyle, ColorTextStyleKit, ColorValueMap, ColorValueProperty, ColorValueStyle, ColorValueStyleKit, ColorViewMap, ColorViewStyle, ColorViewStyleKit } from ".";
+import { ColorTextMap, ColorTextStyle, ColorTextStyleKit, ColorValueMap, ColorValueProperty, ColorValueStyle, ColorValueStyleKit, ColorViewMap, ColorViewProperty, ColorViewStyle, ColorViewStyleKit } from ".";
 import { useMemo } from "react";
 import { NonDefaultStates, StateFlags, StyleState } from "../../component";
 import { ColorValue } from "react-native";
@@ -25,7 +25,7 @@ export function useColorViewStyle(
     // 1. 現在のテーマとcolorKeyに合致するスタイル定義を取得します
     const colorStateMap = map[themeMode]?.[colorKey];
     if (!colorStateMap) {
-      console.warn(`[useCreateColorViewStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
+      console.warn(`[useColorViewStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
       return {};
     }
 
@@ -45,6 +45,16 @@ export function useColorViewStyle(
         const styleForProp = stylesForState[prop];
         if (styleForProp) {
           Object.assign(finalStyle[typedState]!, styleForProp);
+
+          // ★★★ 変更点 ★★★
+          // 'borderColor'プロパティが適用され、かつborderWidthが未定義の場合、
+          // デフォルトでborderWidth: 1を設定します。
+          // これにより、colorKeyでborderColorを指定するだけで枠線が表示されるようになります。
+          if (prop === ColorViewProperty.Border && finalStyle[typedState]!.borderColor) {
+            if (finalStyle[typedState]!.borderWidth === undefined) {
+              finalStyle[typedState]!.borderWidth = 1;
+            }
+          }
         }
       }
     }
@@ -115,6 +125,7 @@ const statePriority: NonDefaultStates[] = [
   StyleState.Focus,
 ];
 
+
 /**
  * ColorValueKitで指定された複数のプロパティについて、
  * 現在の状態に応じた最終的な色の値を一括で解決して返すフック。
@@ -130,7 +141,7 @@ export const useResolvedColorValues = (
     const { colorKey, apply } = kit;
     const resolvedValues: Partial<Record<ColorValueProperty, ColorValue>> = {};
     // 1. ベースとなる色の定義を取得
-    const colorStateMap = map[themeMode]?.[colorKey]; // themeはuseThemeColor()から取得
+    const colorStateMap = map[themeMode]?.[colorKey];
     if (!colorStateMap) return {};
 
     // 2. kitのapplyルールで要求されている全てのプロパティをリストアップ
@@ -162,5 +173,6 @@ export const useResolvedColorValues = (
     }
 
     return resolvedValues;
-  }, [kit, map, stateFlags, useThemeColor]);
+    // useThemeColorはthemeModeに依存するため、themeModeを依存配列に追加
+  }, [kit, map, stateFlags, themeMode]);
 };

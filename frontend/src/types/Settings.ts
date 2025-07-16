@@ -1,4 +1,4 @@
-import { LifecycleUnit, type NoteLifecycle } from './Note';
+import { LifecycleUnit, SpecialLifeCycleUnit, type NoteLifecycle } from './Note';
 
 /**
  * テーマ設定の選択肢
@@ -31,7 +31,7 @@ export type AppSettings = {
 export const defaultAppSettings: AppSettings = {
     theme: ThemeOption.System,
   defaultLifecycle: {
-    unit: LifecycleUnit.Forever,
+    unit: SpecialLifeCycleUnit.Forever,
     value: null,
   },
   confirmBeforeDelete: true,

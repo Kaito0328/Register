@@ -1,4 +1,4 @@
-import { baseIconRoundMap, defaultColorTextMap, defaultColorViewMap, defaultRoundMap, defaultshadowMap, defaultSizeTextMap, defaultSizeViewMap, fontWeightMap, pressableColorViewMap, pressableSizeViewMap, textInputSizeViewMap } from "../tokens";
+import { baseIconRoundMap, defaultColorTextMap, defaultColorViewMap, defaultRoundMap, defaultshadowMap, defaultSizeTextMap, defaultSizeViewMap, fontWeightMap, pressableColorViewMap, pressableSizeViewMap, textInputColorViewMap, textInputSizeViewMap } from "../tokens";
 import { TextStyleMaps, ViewStyleMaps } from "./types";
 
 export const viewStyleMaps: ViewStyleMaps = {
@@ -30,7 +30,7 @@ export const iconStyleMaps: ViewStyleMaps = {
 
 // --- TextInputのView部分のスタイル ---
 export const textInputViewStyleMaps: ViewStyleMaps = {
-  color: defaultColorViewMap,
+  color: textInputColorViewMap,
   size: textInputSizeViewMap, // TextInputに特化したパディング定義
   round: defaultRoundMap,
   shadow: defaultshadowMap,

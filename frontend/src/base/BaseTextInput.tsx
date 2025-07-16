@@ -1,8 +1,9 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useSettings } from "@/contexts/SettingsContext"; // useThemeColorの代わりにuseSettingsを使用すると仮定
 import { ExclusiveMuliStyleProps, PartialTextStyleKit, PartialViewStyleKit, StateFlags, StyleState, textInputTextStyleMaps, textInputViewStyleMaps, TextStyleKit, resolveStyle, useTextStyles, useViewStyles, ViewStyleKit } from "@/styles/component";
-import { ColorTextProperty, ColorValueProperty, ColorValueStyleKit, ColorViewProperty, CoreColorKey, FontWeightKey, RoundKey, SizeKey, SizeTextProperty, SizeViewProperty, textInputColorValueMap, useResolvedColorValues } from "@/styles/tokens";
+import { ColorTextProperty, ColorValueProperty, ColorValueStyleKit, ColorViewProperty, CoreColorKey, FontWeightKey, RoundKey, SizeKey, SizeTextProperty, SizeViewProperty, SizeViewStyle, textInputColorValueMap, useResolvedColorValues } from "@/styles/tokens";
 import { useMemo, useState } from "react";
-import { StyleProp, StyleSheet, TextInput, TextInputProps, TextStyle } from "react-native";
+import { StyleProp, StyleSheet, TextInput, TextInputProps, TextStyle, ViewStyle } from "react-native";
+
 // --- デフォルトKitの定義 ---
 const DEFAULT_INPUT_VIEW_KIT: ViewStyleKit = {
   color: {
@@ -32,16 +33,14 @@ const DEFAULT_INPUT_VALUE_KIT: ColorValueStyleKit = {
   colorKey: CoreColorKey.Base,
   apply: {
     default: [ColorValueProperty.Placeholder, ColorValueProperty.Border, ColorValueProperty.Selection],
-    focus: [ColorValueProperty.Border],
-    disabled: [ColorValueProperty.Border],
+    focus: [ColorValueProperty.Border], // focus状態のボーダー色を解決
+    disabled: [ColorValueProperty.Border], // disabled状態のボーダー色を解決
   },
 };
 
 // --- Propsの型定義 ---
 export type BaseTextInputProps = TextInputProps & {
-  // --- ★ 簡易Propsを追加 ---
   colorKey?: CoreColorKey;
-
 } & ExclusiveMuliStyleProps<PartialViewStyleKit, PartialTextStyleKit>;
 
 export const BaseTextInput: React.FC<BaseTextInputProps> = ({
@@ -55,16 +54,17 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
   editable,
   ...props
 }) => {
-const { themeMode } = useThemeColor();
+  // useThemeColor() は存在しないと仮定し、useSettings() から取得
+  const { themeMode } = useSettings();
   const [isFocused, setIsFocused] = useState(false);
-  const isDisabled = editable === false;
+  const isDisabled = (editable === false); //editable がundefinedを考慮
 
   const stateFlags: StateFlags = {
     [StyleState.Focus]: isFocused,
     [StyleState.Disabled]: isDisabled,
   };
 
-  // ★ 修正点: 簡易Propsから詳細Kitを生成するロジック
+  // 簡易Propsから詳細Kitを生成するロジック
   const overrideViewKit = useMemo((): PartialViewStyleKit => {
     if (easyStyleKit) {
       return {
@@ -73,8 +73,12 @@ const { themeMode } = useThemeColor();
         roundKey: easyStyleKit.roundKey,
       };
     }
+    // colorKey propをviewStyleKitにマージ
+    if (colorKey) {
+        return { ...viewStyleKit, color: { ...viewStyleKit?.color, colorKey } };
+    }
     return viewStyleKit ?? {};
-  }, [easyStyleKit, viewStyleKit]);
+  }, [easyStyleKit, viewStyleKit, colorKey]);
 
   const overrideTextKit = useMemo((): PartialTextStyleKit => {
     if (easyStyleKit) {
@@ -84,21 +88,48 @@ const { themeMode } = useThemeColor();
         fontWeightKey: easyStyleKit.fontWeightKey,
       };
     }
+    // colorKey propをtextStyleKitにマージ
+    if (colorKey) {
+        return { ...textStyleKit, color: { ...textStyleKit?.color, colorKey } };
+    }
     return textStyleKit ?? {};
-  }, [easyStyleKit, textStyleKit]);
+  }, [easyStyleKit, textStyleKit, colorKey]);
+
+  // ★ 修正点: colorKeyをColorValueKitにも反映させる
+  const finalValueKit = useMemo((): ColorValueStyleKit => {
+    const finalColorKey = easyStyleKit?.colorKey || colorKey || DEFAULT_INPUT_VALUE_KIT.colorKey;
+    return {
+      ...DEFAULT_INPUT_VALUE_KIT,
+      colorKey: finalColorKey,
+    };
+  }, [easyStyleKit, colorKey]);
+
 
   // --- スタイルロジック ---
   const viewStyles = useViewStyles(DEFAULT_INPUT_VIEW_KIT, overrideViewKit, textInputViewStyleMaps);
   const textStyles = useTextStyles(DEFAULT_INPUT_TEXT_KIT, overrideTextKit, textInputTextStyleMaps);
-  const colorValues = useResolvedColorValues(DEFAULT_INPUT_VALUE_KIT, textInputColorValueMap, stateFlags);
+  // finalValueKit を使用して色を解決
+  const colorValues = useResolvedColorValues(finalValueKit, textInputColorValueMap, stateFlags);
 
   const resolvedViewStyle = resolveStyle(viewStyles, stateFlags);
   const resolvedTextStyle = resolveStyle(textStyles, stateFlags);
 
+  // ★ 修正点: colorValues.borderが存在する場合に、borderColorとborderWidthを適用する
+  const borderStyle = useMemo((): ViewStyle => {
+    if (colorValues.border) {
+      return {
+        borderColor: colorValues.border,
+        borderWidth: 1, // 色が指定されている場合、幅を1に設定
+      };
+    }
+    return {}; // 色がなければ、スタイルを適用しない
+  }, [colorValues.border]);
+
+
   const finalInputStyle = StyleSheet.flatten([
     resolvedViewStyle,
     resolvedTextStyle,
-    { borderColor: colorValues.border },
+    borderStyle, // 生成したボーダースタイルを適用
     style,
   ]);
 

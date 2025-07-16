@@ -29,7 +29,7 @@ export default function DrawerContent(props: any) {
 
   // ★ 1. SafeAreaViewを一番外側にして、背景色もここに適用
   return (
-    <BaseView style={{flex: 1}}>
+    <BaseView style={{flex: 1}} styleKit={{ color: { colorKey: CoreColorKey.Secondary, apply: { default: [ColorViewProperty.Bg] } } }}>
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* --- ヘッダー部分（固定） --- */}
       <BaseText style={styles.listHeader} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>ノート一覧</BaseText>

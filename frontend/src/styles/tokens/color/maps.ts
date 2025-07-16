@@ -82,6 +82,73 @@ export const pressableColorViewMap: ColorViewMap = {
   },
 };
 
+export const textInputColorViewMap: ColorViewMap = {
+  [ThemeMode.Light]: {
+    [CoreColorKey.Base]: {
+      // デフォルト状態はdefaultColorViewMapから継承
+      [StyleState.Default]: defaultColorViewMap[ThemeMode.Light]?.[CoreColorKey.Base]?.[StyleState.Default],
+      // フォーカス時は、境界線の変化を際立たせるため、背景はクリーンな白に
+      [StyleState.Focus]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#FFFFFF' },
+      },
+      // 無効時は、操作不可であることがわかるように、彩度を落とした色に
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' }, // pressableの無効色と統一
+      },
+    },
+    [CoreColorKey.Primary]: {
+      [StyleState.Default]: defaultColorViewMap[ThemeMode.Light]?.[CoreColorKey.Primary]?.[StyleState.Default],
+      [StyleState.Focus]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0FFF0' }, // Primaryの非常に薄いバージョン
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#E0EAE0' }, // pressableの無効色と統一
+      },
+    },
+    [CoreColorKey.Secondary]: {
+        [StyleState.Default]: defaultColorViewMap[ThemeMode.Light]?.[CoreColorKey.Secondary]?.[StyleState.Default],
+        [StyleState.Focus]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#F5FCF5' }, // Secondaryの非常に薄いバージョン
+        },
+        [StyleState.Disabled]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' }, // pressableの無効色と統一
+        },
+    },
+  },
+  [ThemeMode.Dark]: {
+    [CoreColorKey.Base]: {
+      // デフォルト状態はdefaultColorViewMapから継承
+      [StyleState.Default]: defaultColorViewMap[ThemeMode.Dark]?.[CoreColorKey.Base]?.[StyleState.Default],
+      // フォーカス時は、デフォルトより少し明るい背景にしてフィードバック
+      [StyleState.Focus]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#252c25ff' },
+      },
+      // 無効時は、操作不可であることがわかるように、さらに彩度を落とした色に
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#2a302aff' },
+      },
+    },
+    [CoreColorKey.Primary]: {
+        [StyleState.Default]: defaultColorViewMap[ThemeMode.Dark]?.[CoreColorKey.Primary]?.[StyleState.Default],
+        [StyleState.Focus]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#2a4a2dff' }, // Primaryより少し暗く、彩度を落とした色
+        },
+        [StyleState.Disabled]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#3A5A3A' }, // pressableの無効色と統一
+        },
+    },
+    [CoreColorKey.Secondary]: {
+        [StyleState.Default]: defaultColorViewMap[ThemeMode.Dark]?.[CoreColorKey.Secondary]?.[StyleState.Default],
+        [StyleState.Focus]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#3c463cff' }, // Secondaryより少し暗く、彩度を落とした色
+        },
+        [StyleState.Disabled]: {
+            [ColorViewProperty.Bg]: { backgroundColor: '#344034' }, // pressableの無効色と統一
+        },
+    },
+  },
+};
+
 export const defaultColorTextMap: ColorTextMap = {
   [ThemeMode.Light]: {
     // Primaryボタンの上の文字など

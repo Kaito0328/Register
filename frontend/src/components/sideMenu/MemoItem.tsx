@@ -4,6 +4,7 @@ import { BasePressable } from '../../base/BasePressable';
 import { BaseText } from '../../base/BaseText';
 import { CoreColorKey } from '@/styles/tokens/color';
 import { DeleteButton } from '../editor/DeleteButton';
+import { RoundKey, ShadowKey } from '@/styles/tokens';
 
 type Props = {
   onPress: () => void;
@@ -15,7 +16,7 @@ export const MemoItem: React.FC<Props> = ({ onPress, onDelete, title }) => {
   return (
     <View style={styles.container}>
       {/* ノートタイトル部分（押したら編集画面へ） */}
-      <BasePressable onPress={onPress} style={styles.pressableArea} styleKit={{ color: { colorKey: CoreColorKey.Secondary, apply: {default: []}} }}>
+      <BasePressable onPress={onPress} style={styles.pressableArea} styleKit={{ color: { colorKey: CoreColorKey.Primary, apply: {default: []}}, roundKey: RoundKey.None, shadowKey: ShadowKey.None }}>
         <BaseText styleKit={{ color: { colorKey: CoreColorKey.Base } }} numberOfLines={1}>
           {title}
         </BaseText>

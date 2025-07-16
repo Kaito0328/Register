@@ -13,15 +13,15 @@ type NoteEditorProps = {
 
 export default function NoteEditor({ text, onChangeText }: NoteEditorProps) {
   return (
-    <BaseView styleKit={{ color: { colorKey: CoreColorKey.Secondary }, size: {sizeKey: SizeKey.LG, apply: {default: [SizeViewProperty.Padding]}}}} style={styles.container}>
+    <BaseView styleKit={{ color: { colorKey: CoreColorKey.Base }, size: {sizeKey: SizeKey.LG, apply: {default: [SizeViewProperty.Padding]}}}} style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <BaseTextInput
-          viewStyleKit={{ size: {sizeKey: SizeKey.LG }, color: { colorKey: CoreColorKey.Secondary, apply: {default: []}}}}
+          viewStyleKit={{ size: {sizeKey: SizeKey.LG }, color: { colorKey: CoreColorKey.Base, apply: {default: []}}}}
           textStyleKit={{ size: {sizeKey: SizeKey.LG }, color: { colorKey: CoreColorKey.Base } }}
-          
+
           style={styles.textInput}
           multiline
           placeholder="一時的なメモをここに..."

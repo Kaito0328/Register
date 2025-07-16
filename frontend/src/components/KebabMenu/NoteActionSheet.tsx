@@ -9,6 +9,7 @@ import { LifecycleSettingsModal } from './LifecycleSettingsModal';
 type Props = {
   visible: boolean;
   onClose: () => void;
+  onDelete: () => void; // 削除時のコールバック
   note: Note;
 };
 
@@ -19,7 +20,7 @@ const ActionButton: React.FC<{ label: string; onPress: () => void; isDestructive
   </TouchableOpacity>
 );
 
-export const NoteActionSheet: React.FC<Props> = ({ visible, onClose, note }) => {
+export const NoteActionSheet: React.FC<Props> = ({ visible, onClose, onDelete, note }) => {
   const { deleteNote, togglePin, updateNote } = useNotes();
   const [lifecycleModalVisible, setLifecycleModalVisible] = useState(false);
 
@@ -33,7 +34,7 @@ export const NoteActionSheet: React.FC<Props> = ({ visible, onClose, note }) => 
   };
   
   const handleDelete = () => {
-    onClose();
+    onDelete();
     Alert.alert("ノートを削除", "このノートを本当に削除しますか？", [
       { text: "キャンセル", style: "cancel" },
       { text: "削除", onPress: () => { deleteNote(note.id); router.back(); }, style: "destructive" }
