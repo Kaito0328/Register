@@ -44,7 +44,7 @@ export type NoteLifecycle = {
 
 export enum RemainingTimeDisplayUnit {
   Year = '年',
-  Month = '月',
+  Month = 'ヶ月',
   Day = '日',
   Hour = '時間',
   Minute = '分',

@@ -34,10 +34,11 @@ export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>
   onToggleExpand = () => {},
 }, ref) => {
   const [lifecycle, setLifecycle] = useState<NoteLifecycle>(noteLifecycle);
-    const [error, setError] = useState<string>('');
-    const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
-    const debounceTimer = useRef<number | null>(null);
-    const { updateNote } = useNotes();
+  const [expiresAtState, setExpiresAtState] = useState<number | null>(expiresAt);
+  const [error, setError] = useState<string>('');
+  const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
+  const debounceTimer = useRef<number | null>(null);
+  const { updateNote } = useNotes();
   
   const handleToggleExpand = () => {
     if (isExpanded) {
@@ -54,31 +55,30 @@ export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>
 
   
   const handleSaveLifecycle = (lifecycleToSave: NoteLifecycle) => {
-      if (isValidLifecycle(lifecycle)) {
-        setSaveStatus(ComponentStatus.Loading);
-        setTimeout(() => {
-        const expiresAt = calculateExpiresAt(lifecycleToSave, createdAt);
-        updateNote(noteId, { lifecycle: lifecycleToSave, expiresAt });
-          setSaveStatus(ComponentStatus.Success);
-          setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
-        }, 500);
-      } else {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setError(getErrorMessage(lifecycle.unit));
-        setSaveStatus(ComponentStatus.Error);
-        if (!isExpanded) {
-          setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
-        }
+    if (isValidLifecycle(lifecycle)) {
+      setSaveStatus(ComponentStatus.Loading);
+      setTimeout(() => {
+      const expiresAt = calculateExpiresAt(lifecycleToSave, createdAt);
+      setExpiresAtState(expiresAt);
+      console.log('Saving lifecycle:', lifecycleToSave, 'Expires at:', expiresAt, "Note ID:", noteId); // デバッグ用ログ
+      updateNote(noteId, { lifecycle: lifecycleToSave, expiresAt });
+        setSaveStatus(ComponentStatus.Success);
+        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+      }, 500);
+    } else {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setError(getErrorMessage(lifecycle.unit));
+      setSaveStatus(ComponentStatus.Error);
+      if (!isExpanded) {
+        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
       }
-    };
+    }
+  };
 
-    useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     save: () => {
-      // isTimeUnitの時だけ保存するなど、条件に応じた保存を実行
-      if (isTimeUnit(lifecycle.unit)) {
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        handleSaveLifecycle(lifecycle);
-      }
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      handleSaveLifecycle(lifecycle);
     },
   }));
 
@@ -95,6 +95,24 @@ export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>
 
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
   }, [lifecycle]);
+
+  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+    };
+  }, [noteId]);
+
+  // ★★★ propsが変更された時に状態を同期
+  useEffect(() => {
+    setLifecycle(noteLifecycle);
+    setExpiresAtState(expiresAt);
+    setError('');
+    setSaveStatus(ComponentStatus.Idle);
+  }, [noteLifecycle, expiresAt]);
 
     useEffect(() => {
       console.log('LifecycleSetting: isExpanded changed', isExpanded);
@@ -116,7 +134,7 @@ export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>
           <View style={{ flex: 1 }}>
             <LifecycleDisplay
               lifecycle={lifecycle}
-              expiresAt={expiresAt}
+              expiresAt={expiresAtState}
               onSelectSpecialUnit={handleSelectSpecialUnit}
             />
           </View>

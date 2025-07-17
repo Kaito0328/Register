@@ -48,6 +48,16 @@ export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initi
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
   }, [text, handleSave]);
+
+  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+    };
+  }, [noteId]);
   
   // note.textが外部から変更された場合に同期する
   useEffect(() => {

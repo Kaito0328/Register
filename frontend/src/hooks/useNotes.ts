@@ -19,8 +19,10 @@ export const useNotes = () => {
     }
   }, [notes]);
 
-    useEffect(() => {
-      saveNotesToStorage();
+  useEffect(() => {
+      if (notes.length > 0) {
+        saveNotesToStorage();
+      }
   }, [notes]);
 
   // ★ 1. アプリ起動時にデータを読み込む処理
@@ -37,22 +39,7 @@ export const useNotes = () => {
     };
     loadNotes();
   }, []); // 空の依存配列で、初回の一度だけ実行
-
-  // ★ 2. notesのデータが変更されるたびに自動で保存する処理
-  useEffect(() => {
-    const saveNotes = async () => {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-      } catch (e) {
-        console.error('Failed to save notes.', e);
-      }
-    };
-    // 初回ロード時（notesが空の配列の時）に保存が走らないように条件分岐
-    if (notes.length > 0) {
-      saveNotes();
-    }
-  }, [notes]); 
-
+  
   const createNote = useCallback((text: string): Note => {
     const now = Date.now();
     const newNote: Note = {
@@ -80,6 +67,7 @@ export const useNotes = () => {
         note.id === id ? { ...note, ...updateNote, updatedAt: Date.now() } : note
       )
     );
+    console.log('Note updated:', id, updateNote); // デバッグ用ログ
   }, []);
 
   // ★ ノートを削除する関数を追加

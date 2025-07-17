@@ -30,7 +30,7 @@ export default function DrawerContent(props: any) {
 
   // ★ 1. SafeAreaViewを一番外側にして、背景色もここに適用
   return (
-    <BaseView style={{flex: 1}} styleKit={{ color: { colorKey: CoreColorKey.Secondary, apply: { default: [ColorViewProperty.Bg] } } }}>
+    <BaseView style={{flex: 1}} styleKit={{color: { colorKey: CoreColorKey.Secondary, apply: { default: [ColorViewProperty.Bg] } } }}>
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* --- ヘッダー部分（固定） --- */}
       <BaseText style={styles.listHeader} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>ノート一覧</BaseText>
@@ -44,7 +44,7 @@ export default function DrawerContent(props: any) {
         {notes.map((note) => (
           <MemoItem
             key={note.id}
-            title={note.title || '無題のメモ'}
+            title={note.title || '空のノート'}
             onPress={() => {
               router.push(`/note/${note.id}`);
               props.navigation.closeDrawer();
@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
   },
     footer: {
     borderTopWidth: 1,
-    borderColor: '#e0e0e0',
     padding: 8,
   }
 });

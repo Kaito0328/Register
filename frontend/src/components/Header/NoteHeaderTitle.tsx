@@ -1,6 +1,6 @@
 // components/Header/NoteHeaderTitle.tsx
 
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
 import { BaseTextInput } from '@/base/BaseTextInput';
 import { CoreColorKey, RoundKey, SizeKey } from '@/styles/tokens';
 import { useNotes } from '@/contexts/NotesContext';
@@ -19,9 +19,11 @@ export type NoteHeaderTitleHandle = {
 export const NoteHeaderTitle = forwardRef<NoteHeaderTitleHandle, Props>(({ noteId, initialTitle }, ref) => {
   const { updateNote } = useNotes();
   const [title, setTitle] = useState(initialTitle);
+  const debounceTimer = useRef<number | null>(null);
 
   // ★★★ タイトルを保存するロジック
   const handleSave = useCallback(() => {
+    console.log('Saving title:', title); // デバッグ用ログ
     // 初期値と異なれば更新
     if (title !== initialTitle) {
       updateNote(noteId, { title });
@@ -35,11 +37,27 @@ export const NoteHeaderTitle = forwardRef<NoteHeaderTitleHandle, Props>(({ noteI
 
   // 2秒間のデバウンスによる自動保存
   useEffect(() => {
-    const handler = setTimeout(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      console.log('Auto-saving title after 2 seconds:', title); // デバッグ用ログ
       handleSave();
     }, 2000);
-    return () => clearTimeout(handler);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
   }, [title, handleSave]);
+
+  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
+  useEffect(() => {
+    // noteIdが変更された時は即座に前のタイマーをクリアし、新しいnoteIdでの処理に備える
+    console.log('Note ID changed, clearing any pending save operations'); // デバッグ用ログ
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+    };
+  }, [noteId]);
   
   // note.titleが外部から変更された場合に同期する
   useEffect(() => {
