@@ -1,6 +1,6 @@
 import { BaseView } from "@/base/BaseView";
 import { LifecycleUnit, Note, NoteLifecycle, SpecialLifeCycleUnit, TimeUnit } from "@/types/Note";
-import { use, useEffect, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useEffect, useRef, useState } from "react";
 import { LayoutAnimation, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LifecycleDisplay } from "./LifecycleDisplay";
 import { LifecycleEditor } from "./LifeCycleEditor";
@@ -9,25 +9,35 @@ import { BaseIcon } from "@/base/BaseIcon";
 import { CoreColorKey, SizeKey } from "@/styles/tokens";
 import { ComponentStatus } from "@/types/ComponentStatus";
 import { StatusMessage } from "../StatusMessage/StatusMessage";
-import { getErrorMessage, isTimeUnit, isValidLifecycle } from "@/utils/LifeCycleUtils";
+import { calculateExpiresAt, getErrorMessage, isTimeUnit, isValidLifecycle } from "@/utils/LifeCycleUtils";
+import { useNotes } from "@/hooks/useNotes";
 
 type SettingProps = {
-  note: Note;
+  noteId: string;
+  createdAt: number;
+  noteLifecycle: NoteLifecycle;
+  expiresAt: number | null;
   isExpanded: boolean;
-  onLifecycleChange: (lifecycle: NoteLifecycle) => void;
   onToggleExpand?: () => void;
 };
 
-export const LifecycleSetting: React.FC<SettingProps> = ({
-  note,
+export type LifecycleSettingHandle = {
+  save: () => void;
+};
+
+export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>(({
+  noteId,
+  createdAt,
+  noteLifecycle,
+  expiresAt,
   isExpanded,
-  onLifecycleChange,
   onToggleExpand = () => {},
-}) => {
-  const [lifecycle, setLifecycle] = useState<NoteLifecycle>(note.lifecycle);
+}, ref) => {
+  const [lifecycle, setLifecycle] = useState<NoteLifecycle>(noteLifecycle);
     const [error, setError] = useState<string>('');
     const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
-      const debounceTimer = useRef<number | null>(null);
+    const debounceTimer = useRef<number | null>(null);
+    const { updateNote } = useNotes();
   
   const handleToggleExpand = () => {
     if (isExpanded) {
@@ -41,12 +51,14 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
     setLifecycle({ unit, value: null });
     handleSaveLifecycle({ unit, value: null });
   };
+
   
-  const handleSaveLifecycle = (lifecycle: NoteLifecycle) => {
+  const handleSaveLifecycle = (lifecycleToSave: NoteLifecycle) => {
       if (isValidLifecycle(lifecycle)) {
         setSaveStatus(ComponentStatus.Loading);
         setTimeout(() => {
-          onLifecycleChange(lifecycle);
+        const expiresAt = calculateExpiresAt(lifecycleToSave, createdAt);
+        updateNote(noteId, { lifecycle: lifecycleToSave, expiresAt });
           setSaveStatus(ComponentStatus.Success);
           setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
         }, 500);
@@ -59,6 +71,16 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
         }
       }
     };
+
+    useImperativeHandle(ref, () => ({
+    save: () => {
+      // isTimeUnitの時だけ保存するなど、条件に応じた保存を実行
+      if (isTimeUnit(lifecycle.unit)) {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        handleSaveLifecycle(lifecycle);
+      }
+    },
+  }));
 
   useEffect(() => {
     
@@ -94,7 +116,7 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
           <View style={{ flex: 1 }}>
             <LifecycleDisplay
               lifecycle={lifecycle}
-              expiresAt={note.expiresAt}
+              expiresAt={expiresAt}
               onSelectSpecialUnit={handleSelectSpecialUnit}
             />
           </View>
@@ -125,7 +147,7 @@ export const LifecycleSetting: React.FC<SettingProps> = ({
       </BaseView>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '../Button';
 import { CoreColorKey } from '@/styles/tokens/color';
 import { Alert } from 'react-native';
+import { ShadowKey } from '@/styles/tokens';
 
 type Props = {
   onPress: () => void;
@@ -34,9 +35,9 @@ export const DeleteButton: React.FC<Props> = ({ onPress }) => {
     <Button
       onPress={handleDeletePress}
       // 背景色をデンジャーカラーに
-      viewStyleKit={{ color: { colorKey: CoreColorKey.Danger } }}
+      viewStyleKit={{ color: { colorKey: CoreColorKey.Danger }, shadowKey: ShadowKey.None }}
       // 文字色を背景色に合わせて調整
-      textStyleKit={{ color: { colorKey: CoreColorKey.Secondary } }}
+      textStyleKit={{ color: { colorKey: CoreColorKey.Danger } }}
     >
       削除
     </Button>

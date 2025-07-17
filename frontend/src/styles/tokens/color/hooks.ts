@@ -25,7 +25,7 @@ export function useColorViewStyle(
     // 1. 現在のテーマとcolorKeyに合致するスタイル定義を取得します
     const colorStateMap = map[themeMode]?.[colorKey];
     if (!colorStateMap) {
-      console.warn(`[useColorViewStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
+      // console.warn(`[useColorViewStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
       return {};
     }
 
@@ -85,7 +85,7 @@ export function useColorTextStyle(
     // 1. 現在のテーマとcolorKeyに合致するスタイル定義を取得します
     const colorStateMap = map[themeMode]?.[colorKey];
     if (!colorStateMap) {
-      console.warn(`[useCreateColorTextStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
+      // console.warn(`[useCreateColorTextStyle] Color key "${colorKey}" not found in theme "${themeMode}".`);
       return {};
     }
 

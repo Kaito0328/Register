@@ -12,6 +12,7 @@ type NoteEditorProps = {
 };
 
 export default function NoteEditor({ text, onChangeText }: NoteEditorProps) {
+  console.log("NoteEditor rendered", text); // デバッグ用ログ
   return (
     <BaseView styleKit={{ color: { colorKey: CoreColorKey.Base }, size: {sizeKey: SizeKey.LG, apply: {default: [SizeViewProperty.Padding]}}}} style={styles.container}>
       <KeyboardAvoidingView

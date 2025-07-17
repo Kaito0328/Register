@@ -9,6 +9,7 @@ import { MemoItem } from './MemoItem';
 import { BaseView } from '../../base/BaseView';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../Button';
+import { ShadowKey } from '@/styles/tokens';
 
 export default function DrawerContent(props: any) {
   const { notes, createNote, deleteNote } = useNotes();
@@ -55,7 +56,7 @@ export default function DrawerContent(props: any) {
             <BaseView style={styles.footer}>
         <Button 
           onPress={navigateToSettings}
-          viewStyleKit={{color: {colorKey: CoreColorKey.Base, apply: {default: []}}}}
+          viewStyleKit={{color: {colorKey: CoreColorKey.Base, apply: {default: []}}, shadowKey: ShadowKey.None}}
         >
           設定
         </Button>
