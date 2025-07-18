@@ -9,6 +9,7 @@ type Props = {
 
 export type NoteContentHandle = {
   save: () => void;
+  getText: () => string;
 };
 
 export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initialText }, ref) => {
@@ -25,8 +26,9 @@ export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initi
   const handleSave = useCallback(() => {
     // ★★★ 実行される瞬間の最新の値をrefから取得
     const { noteId, initialText, text, updateNote } = latestData.current;
-    if (text !== initialText) {
-      console.log('Saving note content:', noteId, text); // デバッグ用ログ
+    console.log('Saving note content:', noteId, text); // デバッグ用ログ
+    if (text !== initialText) { 
+      console.log('Saving note content: text is not initialText', noteId, text); // デバッグ用ログ
       updateNote(noteId, { text });
     }
   }, []); // ★★★ 依存配列を空にして関数を安定させる
@@ -35,6 +37,9 @@ export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initi
     save: () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
       handleSave();
+    },
+    getText: () => {
+      return latestData.current.text;
     },
   }));
 

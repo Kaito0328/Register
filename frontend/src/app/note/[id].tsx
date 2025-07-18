@@ -21,13 +21,8 @@ export default function NoteDetailScreen() {
   const { findNoteById, deleteNote, notes } = useNotes();
 
   const note = useMemo(() => {
-    console.log('Recalculating note for id:', id);
     return findNoteById(id);
   }, [id, notes, findNoteById]);
-  
-
-  console.log("id:", id); // デバッグ用ログ
-  console.log("note:", note); // デバッグ用ログ
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [isLifecycleExpanded, setIsLifecycleExpanded] = useState(false);
@@ -45,10 +40,11 @@ export default function NoteDetailScreen() {
   // ★★★ 親の役割は「全員に保存を命令する」ことだけ
   const handleFinalSave = useCallback(() => {
     console.log("Final save triggered for note ID:", id); // デバッグ用ログ
-    titleRef.current?.save();
+    const currentText = contentRef.current?.getText();
+    titleRef.current?.save(currentText);
     contentRef.current?.save();
     lifecycleRef.current?.save();
-  }, []);
+  }, [id]);
 
   const handleDelete = () => {
     if (!id) return;

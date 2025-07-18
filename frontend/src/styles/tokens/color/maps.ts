@@ -19,6 +19,11 @@ export const defaultColorViewMap: ColorViewMap = {
         [ColorViewProperty.Bg]: { backgroundColor: '#F8FCF8' }, // ほぼ白に近い緑がかった背景
       },
     },
+    [CoreColorKey.Danger]: {
+      [StyleState.Default]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#D32F2F' }, // エラーや警告用の赤
+      },
+    },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
@@ -34,6 +39,11 @@ export const defaultColorViewMap: ColorViewMap = {
     [CoreColorKey.Base]: {
       [StyleState.Default]: {
         [ColorViewProperty.Bg]: { backgroundColor: '#1d241dff' }, // 【変更】全体のトーンに合わせて少し明るく
+      },
+    },
+    [CoreColorKey.Danger]: {
+      [StyleState.Default]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#D32F2F' }, // エラーや警告用の赤
       },
     },
   },
