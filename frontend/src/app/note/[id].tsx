@@ -1,6 +1,6 @@
 // app/note/[id].tsx
 
-import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, use, useMemo } from 'react';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { AppState, View, StyleSheet, Pressable, LayoutAnimation } from 'react-native';
 import { BaseText } from '@/base/BaseText';
@@ -18,8 +18,13 @@ import { LifecycleSetting, type LifecycleSettingHandle } from '@/components/Life
 export default function NoteDetailScreen() {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { findNoteById, deleteNote } = useNotes();
-  const note = findNoteById(id);
+  const { findNoteById, deleteNote, notes } = useNotes();
+
+  const note = useMemo(() => {
+    console.log('Recalculating note for id:', id);
+    return findNoteById(id);
+  }, [id, notes, findNoteById]);
+  
 
   console.log("id:", id); // デバッグ用ログ
   console.log("note:", note); // デバッグ用ログ
@@ -39,14 +44,15 @@ export default function NoteDetailScreen() {
 
   // ★★★ 親の役割は「全員に保存を命令する」ことだけ
   const handleFinalSave = useCallback(() => {
+    console.log("Final save triggered for note ID:", id); // デバッグ用ログ
     titleRef.current?.save();
     contentRef.current?.save();
     lifecycleRef.current?.save();
   }, []);
 
   const handleDelete = () => {
-    if (!note) return;
-    deleteNote(note.id);
+    if (!id) return;
+    deleteNote(id);
     router.back();
   };
 
@@ -73,22 +79,22 @@ export default function NoteDetailScreen() {
     return unsubscribe;
   }, [navigation, handleFinalSave, id]);
 
-  // ★★★ ノートIDが変更された時の保存処理
-  const prevIdRef = useRef<string | undefined>(id);
-  useEffect(() => {
-    if (prevIdRef.current && prevIdRef.current !== id) {
-      console.log(`Note ID changed from ${prevIdRef.current} to ${id}, saving previous note...`); // デバッグ用ログ
-      // 前のノートの保存を即座に実行
-      handleFinalSave();
-    }
-    prevIdRef.current = id;
-  }, [id, handleFinalSave]);
+  // // ★★★ ノートIDが変更された時の保存処理
+  // const prevIdRef = useRef<string | undefined>(id);
+  // useEffect(() => {
+  //   if (prevIdRef.current && prevIdRef.current !== id) {
+  //     console.log(`Note ID changed from ${prevIdRef.current} to ${id}, saving previous note...`); // デバッグ用ログ
+  //     // 前のノートの保存を即座に実行
+  //     handleFinalSave();
+  //   }
+  //   prevIdRef.current = id;
+  // }, [id, handleFinalSave]);
 
   useLayoutEffect(() => {
     if (!note) return;
     navigation.setOptions({
       headerTitle: () => (
-        <NoteHeaderTitle ref={titleRef} noteId={note.id} initialTitle={note.title} />
+        <NoteHeaderTitle key={note.id} ref={titleRef} noteId={note.id} initialTitle={note.title} />
       ),
       headerRight: () => (
         <NoteHeaderMenu onPress={() => setMenuVisible(true)} />
@@ -121,7 +127,8 @@ export default function NoteDetailScreen() {
     <BaseView style={styles.container} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
       <View style={styles.settingWrapper}>
         <LifecycleSetting
-          noteId={note.id}
+          key={id}
+          noteId={id}
           createdAt={note.createdAt}
           ref={lifecycleRef}
           noteLifecycle={note.lifecycle}
@@ -133,8 +140,9 @@ export default function NoteDetailScreen() {
 
       <View style={styles.contentWrapper}>
         <NoteContent
+          key={id}
           ref={contentRef}
-          noteId={note.id}
+          noteId={id}
           initialText={note.text || ''}
         />
       </View>

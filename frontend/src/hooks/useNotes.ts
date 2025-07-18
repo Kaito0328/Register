@@ -1,31 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // ★ インポート
-import { LifecycleUnit, NoteLifecycle, SpecialLifeCycleUnit, type Note } from '@/types/Note'; 
+import { useState, useCallback, useEffect, useMemo } from 'react'; // ★ useMemoをインポート
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Note, SpecialLifeCycleUnit } from '@/types/Note';
 
-
-// ★ ストレージに保存するためのキーを定義
 const STORAGE_KEY = 'notes';
 
 export const useNotes = () => {
-  // ★ 初期状態は空の配列にする
   const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const saveNotesToStorage = useCallback(async () => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-      console.log('Notes saved successfully.', notes);
-    } catch (e) {
-      console.error('Failed to save notes.', e);
-    }
-  }, [notes]);
-
-  useEffect(() => {
-      if (notes.length > 0) {
-        saveNotesToStorage();
-      }
-  }, [notes]);
-
-  // ★ 1. アプリ起動時にデータを読み込む処理
+  // ★ 1. アプリ起動時にデータを読み込む
   useEffect(() => {
     const loadNotes = async () => {
       try {
@@ -33,13 +16,31 @@ export const useNotes = () => {
         if (storedNotes !== null) {
           setNotes(JSON.parse(storedNotes));
         }
+        setIsLoaded(true);
       } catch (e) {
         console.error('Failed to load notes.', e);
+        setIsLoaded(true);
       }
     };
     loadNotes();
-  }, []); // 空の依存配列で、初回の一度だけ実行
-  
+  }, []); // 初回の一度だけ実行
+
+  // ★ 2. notesが変更されたらストレージに保存する（初回ロード後のみ）
+  useEffect(() => {
+    console.log('Notes changed, saving to storage:', notes.length, 'notes');
+    if (!isLoaded) return; // 初回ロード完了まで保存処理をスキップ
+    
+    const saveNotes = async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        console.log('Notes saved to storage:', notes.length, 'notes');
+      } catch (e) {
+        console.error('Failed to save notes.', e);
+      }
+    };
+    saveNotes();
+  }, [notes, isLoaded]);
+
   const createNote = useCallback((text: string): Note => {
     const now = Date.now();
     const newNote: Note = {
@@ -48,9 +49,9 @@ export const useNotes = () => {
       title: '',
       createdAt: now,
       updatedAt: now,
-      isPinned: false, // ★ 追加
+      isPinned: false,
       lifecycle: { unit: SpecialLifeCycleUnit.Forever, value: null },
-      expiresAt: null, // ★ 追加
+      expiresAt: null,
     };
     setNotes((prev) => [newNote, ...prev]);
     return newNote;
@@ -61,21 +62,22 @@ export const useNotes = () => {
     return notes.find((note) => note.id === id);
   }, [notes]);
 
-  const updateNote = useCallback((id: string, updateNote: Partial<Note>) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === id ? { ...note, ...updateNote, updatedAt: Date.now() } : note
-      )
-    );
-    console.log('Note updated:', id, updateNote); // デバッグ用ログ
+  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+    console.log('updateNote called:', id, updates);
+    setNotes((prev) => {
+      const updated = prev.map((note) =>
+        note.id === id ? { ...note, ...updates, updatedAt: Date.now() } : note
+      );
+      console.log('Notes updated, count:', updated.length);
+      return updated;
+    });
   }, []);
 
-  // ★ ノートを削除する関数を追加
   const deleteNote = useCallback((id: string) => {
     setNotes((prev) => prev.filter((note) => note.id !== id));
   }, []);
 
-    const togglePin = useCallback((id: string) => {
+  const togglePin = useCallback((id: string) => {
     setNotes((prev) =>
       prev.map((note) =>
         note.id === id ? { ...note, isPinned: !note.isPinned } : note
@@ -83,5 +85,15 @@ export const useNotes = () => {
     );
   }, []);
 
-  return { notes, createNote, findNoteById, updateNote, deleteNote, togglePin};
+  // ★★★ ここが最も重要 ★★★
+  // useMemoを使って、valueオブジェクトの参照を安定させる
+  return useMemo(() => ({
+    notes,
+    createNote,
+    findNoteById,
+    updateNote,
+    deleteNote,
+    togglePin,
+    isLoaded,
+  }), [notes, isLoaded, findNoteById, createNote, updateNote, deleteNote, togglePin]);
 };

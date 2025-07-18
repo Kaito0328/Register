@@ -10,6 +10,7 @@ type NotesContextType = {
   updateNote: (id: string, updateNote: Partial<Note>) => void;
   deleteNote: (id: string) => void;
   togglePin: (id: string) => void;
+  isLoaded: boolean;
 };
 
 // Contextを作成。初期値はundefinedでOK

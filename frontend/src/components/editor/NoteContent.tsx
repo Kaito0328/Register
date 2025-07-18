@@ -1,5 +1,3 @@
-// components/editor/NoteContent.tsx
-
 import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useNotes } from '@/contexts/NotesContext';
 import NoteEditor from './NoteEditor';
@@ -9,36 +7,37 @@ type Props = {
   initialText: string;
 };
 
-// ★★★ 親から命令を受け取るためのハンドルの型を定義
 export type NoteContentHandle = {
   save: () => void;
 };
 
-// ★★★ forwardRefでラップ
 export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initialText }, ref) => {
   const { updateNote } = useNotes();
   const [text, setText] = useState(initialText);
   const debounceTimer = useRef<number | null>(null);
 
-  // ★★★ 即時保存用の関数
+  // ★★★ 最新のpropsとstateを保持するためのref
+  const latestData = useRef({ noteId, initialText, text, updateNote });
+  useEffect(() => {
+    latestData.current = { noteId, initialText, text, updateNote };
+  });
+
   const handleSave = useCallback(() => {
+    // ★★★ 実行される瞬間の最新の値をrefから取得
+    const { noteId, initialText, text, updateNote } = latestData.current;
     if (text !== initialText) {
+      console.log('Saving note content:', noteId, text); // デバッグ用ログ
       updateNote(noteId, { text });
     }
-  }, [noteId, text, initialText, updateNote]);
+  }, []); // ★★★ 依存配列を空にして関数を安定させる
 
-  // ★★★ 親に'save'メソッドを公開
   useImperativeHandle(ref, () => ({
     save: () => {
-      // 進行中のタイマーをキャンセルして即時保存
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
       handleSave();
     },
   }));
 
-  // 2秒間のデバウンスによる自動保存
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
@@ -49,17 +48,6 @@ export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initi
     };
   }, [text, handleSave]);
 
-  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-        debounceTimer.current = null;
-      }
-    };
-  }, [noteId]);
-  
-  // note.textが外部から変更された場合に同期する
   useEffect(() => {
     setText(initialText);
   }, [initialText]);

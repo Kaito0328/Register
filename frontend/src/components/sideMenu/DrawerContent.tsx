@@ -13,7 +13,10 @@ import { ShadowKey } from '@/styles/tokens';
 
 export default function DrawerContent(props: any) {
   const { notes, createNote, deleteNote } = useNotes();
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
+
+  // デバッグ用のログ
+  console.log('DrawerContent rendered with notes:', notes.length);
 
   const handleCreateNote = () => {
     const newNote = createNote('');

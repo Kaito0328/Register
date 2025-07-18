@@ -1,7 +1,7 @@
 import { BaseView } from "@/base/BaseView";
-import { LifecycleUnit, Note, NoteLifecycle, SpecialLifeCycleUnit, TimeUnit } from "@/types/Note";
-import { forwardRef, useImperativeHandle, useEffect, useRef, useState } from "react";
-import { LayoutAnimation, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { NoteLifecycle, SpecialLifeCycleUnit, TimeUnit } from "@/types/Note";
+import { forwardRef, useImperativeHandle, useEffect, useRef, useState, useCallback } from "react";
+import { LayoutAnimation, StyleSheet, TouchableOpacity, View } from "react-native";
 import { LifecycleDisplay } from "./LifecycleDisplay";
 import { LifecycleEditor } from "./LifeCycleEditor";
 import { ChevronDown } from 'lucide-react-native';
@@ -10,7 +10,7 @@ import { CoreColorKey, SizeKey } from "@/styles/tokens";
 import { ComponentStatus } from "@/types/ComponentStatus";
 import { StatusMessage } from "../StatusMessage/StatusMessage";
 import { calculateExpiresAt, getErrorMessage, isTimeUnit, isValidLifecycle } from "@/utils/LifeCycleUtils";
-import { useNotes } from "@/hooks/useNotes";
+import { useNotes } from "@/contexts/NotesContext";
 
 type SettingProps = {
   noteId: string;
@@ -33,137 +33,125 @@ export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>
   isExpanded,
   onToggleExpand = () => {},
 }, ref) => {
+  const { updateNote } = useNotes();
   const [lifecycle, setLifecycle] = useState<NoteLifecycle>(noteLifecycle);
-  const [expiresAtState, setExpiresAtState] = useState<number | null>(expiresAt);
   const [error, setError] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
   const debounceTimer = useRef<number | null>(null);
-  const { updateNote } = useNotes();
+
+  const latestData = useRef({ noteId, createdAt, lifecycle, updateNote, noteLifecycle });
+  useEffect(() => {
+    latestData.current = { noteId, createdAt, lifecycle, updateNote, noteLifecycle };
+  });
+const handleSaveLifecycle = useCallback((lifecycleOverride?: NoteLifecycle) => {
+  // ★★★ 引数で渡された値を最優先で使い、なければrefの値を使う
+  const { noteId, createdAt, updateNote, noteLifecycle } = latestData.current;
+  const lifecycle = lifecycleOverride ?? latestData.current.lifecycle;
+
+  if (!isValidLifecycle(lifecycle)) {
+    setError(getErrorMessage(lifecycle.unit));
+    setSaveStatus(ComponentStatus.Error);
+    return;
+  }
+  if (lifecycle.unit === noteLifecycle.unit && lifecycle.value === noteLifecycle.value) {
+    return;
+  }
+
+  setSaveStatus(ComponentStatus.Loading);
+  setError('');
+  setTimeout(() => {
+    const newExpiresAt = calculateExpiresAt(lifecycle, createdAt);
+    updateNote(noteId, { lifecycle, expiresAt: newExpiresAt });
+    setSaveStatus(ComponentStatus.Success);
+    setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+  }, 500);
+}, []);
+
+  useImperativeHandle(ref, () => ({
+    save: () => {
+      if (isTimeUnit(latestData.current.lifecycle.unit)) {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        handleSaveLifecycle();
+      }
+    },
+  }));
+
   
   const handleToggleExpand = () => {
-    if (isExpanded) {
-      
-    }
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     onToggleExpand();
   };
 
+
   const handleSelectSpecialUnit = (unit: SpecialLifeCycleUnit) => {
-    setLifecycle({ unit, value: null });
-    handleSaveLifecycle({ unit, value: null });
-  };
+    const newLifecycle = { unit, value: null };
+    setLifecycle(newLifecycle);
 
-  
-  const handleSaveLifecycle = (lifecycleToSave: NoteLifecycle) => {
-    if (isValidLifecycle(lifecycle)) {
-      setSaveStatus(ComponentStatus.Loading);
-      setTimeout(() => {
-      const expiresAt = calculateExpiresAt(lifecycleToSave, createdAt);
-      setExpiresAtState(expiresAt);
-      console.log('Saving lifecycle:', lifecycleToSave, 'Expires at:', expiresAt, "Note ID:", noteId); // デバッグ用ログ
-      updateNote(noteId, { lifecycle: lifecycleToSave, expiresAt });
-        setSaveStatus(ComponentStatus.Success);
-        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
-      }, 500);
-    } else {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setError(getErrorMessage(lifecycle.unit));
-      setSaveStatus(ComponentStatus.Error);
-      if (!isExpanded) {
-        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
-      }
+    // ★★★ ここから修正 ★★★
+    // 進行中のタイマーがあればキャンセル
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
+    // 即時保存を実行
+    handleSaveLifecycle(newLifecycle);
+    // ★★★ ここまで修正 ★★★
   };
-
-  useImperativeHandle(ref, () => ({
-    save: () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-      handleSaveLifecycle(lifecycle);
-    },
-  }));
-
+  
   useEffect(() => {
-    
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    setError('');
-    setSaveStatus(ComponentStatus.Idle);
-    if (!isTimeUnit(lifecycle.unit)) return;
-
-    debounceTimer.current = setTimeout(() => {
-      handleSaveLifecycle(lifecycle);
-    }, 1500);
-
+    if (!isTimeUnit(lifecycle.unit)) {
+      setSaveStatus(ComponentStatus.Idle);
+      setError('');
+      return;
+    }
+    debounceTimer.current = setTimeout(handleSaveLifecycle, 1500);
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [lifecycle]);
+  }, [lifecycle, handleSaveLifecycle]);
 
-  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
   useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-        debounceTimer.current = null;
-      }
-    };
-  }, [noteId]);
-
-  // ★★★ propsが変更された時に状態を同期
+    if (!isExpanded && isTimeUnit(lifecycle.unit)) {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      handleSaveLifecycle();
+    }
+  }, [isExpanded, handleSaveLifecycle]);
+  
   useEffect(() => {
     setLifecycle(noteLifecycle);
-    setExpiresAtState(expiresAt);
-    setError('');
-    setSaveStatus(ComponentStatus.Idle);
   }, [noteLifecycle, expiresAt]);
 
-    useEffect(() => {
-      console.log('LifecycleSetting: isExpanded changed', isExpanded);
-      if (!isExpanded && isTimeUnit(lifecycle.unit)) {
-        if (debounceTimer.current) {
-          clearTimeout(debounceTimer.current);
-        }
-        console.log('LifecycleSetting: Saving lifecycle on collapse', lifecycle);
-        handleSaveLifecycle(lifecycle);
-      }
-    }, [isExpanded]);
-
   return (
-    <View>
-      
-      <BaseView style={styles.container} onStartShouldSetResponder={() => true}>
-
-        <View style={styles.headerTouchable}>
-          <View style={{ flex: 1 }}>
-            <LifecycleDisplay
-              lifecycle={lifecycle}
-              expiresAt={expiresAtState}
-              onSelectSpecialUnit={handleSelectSpecialUnit}
-            />
-          </View>
-          <TouchableOpacity onPress={handleToggleExpand} >
-            <BaseIcon
-              icon={ChevronDown}
-              styleKit={{
-                color: { colorKey: CoreColorKey.Base },
-                size: { sizeKey: SizeKey.MD } // 16pxに相当するサイズキーを指定
-              }}
-              style={[styles.chevronIcon, isExpanded && styles.chevronIconExpanded]}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {isExpanded && (
-          <LifecycleEditor
+    <BaseView style={styles.container} onStartShouldSetResponder={() => true}>
+      <View style={styles.headerTouchable}>
+        <View style={{ flex: 1 }}>
+          <LifecycleDisplay
             lifecycle={lifecycle}
-            setLifecycle={setLifecycle}
+            expiresAt={expiresAt}
+            onSelectSpecialUnit={handleSelectSpecialUnit}
           />
-        )}
+        </View>
+        <TouchableOpacity onPress={handleToggleExpand} >
+          <BaseIcon icon={ChevronDown} 
+            styleKit={{
+              color: { colorKey: CoreColorKey.Base },
+              size: { sizeKey: SizeKey.MD } 
+            }} 
+            style={[styles.chevronIcon, isExpanded && styles.chevronIconExpanded]}
+          />
+        </TouchableOpacity>
+      </View>
+      {isExpanded && (
+        <LifecycleEditor
+          lifecycle={lifecycle}
+          setLifecycle={setLifecycle}
+        />
+      )}
       <StatusMessage
         status={saveStatus}
         loadingMessage="保存中..."
         successMessage="✓ 保存済み"
         errorMessage={error}
       />
-      </BaseView>
-    </View>
+    </BaseView>
   );
 });
 
@@ -173,16 +161,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     width: '100%',
   },
-    headerTouchable: {
-      width: '100%',
+  headerTouchable: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-    chevronIcon: {
-    marginLeft: 16, // displayContainerとの間に余白
+  chevronIcon: {
+    marginLeft: 16,
   },
-    chevronIconExpanded: {
+  chevronIconExpanded: {
     transform: [{ rotate: '180deg' }],
   },
 });
