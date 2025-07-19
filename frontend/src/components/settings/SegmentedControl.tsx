@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { BaseText } from '../../base/BaseText';
+import { BasePressable } from '@/base/BasePressable';
+import { ColorViewProperty, CoreColorKey, RoundKey, ShadowKey } from '@/styles/tokens';
+import { BaseView } from '@/base/BaseView';
 
 // 単一の選択肢の型を定義
 type Option = {
@@ -20,67 +23,54 @@ type Props = {
  */
 export const SegmentedControl: React.FC<Props> = ({ options, selectedValue, onValueChange }) => {
   return (
-    <View style={styles.container}>
-      {options.map((option, index) => {
-        const isSelected = option.value === selectedValue;
-        return (
-          <TouchableOpacity
-            key={option.value}
-            style={[
-              styles.button,
-              // 選択されているボタンに特別なスタイルを適用
-              isSelected && styles.selectedButton,
-            ]}
-            onPress={() => onValueChange(option.value)}
-            activeOpacity={0.8}
-          >
-            <BaseText style={[
-              styles.text,
-              // 選択されているテキストに特別なスタイルを適用
-              isSelected && styles.selectedText
-            ]}>
-              {option.label}
-            </BaseText>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+    <BaseView style={styles.container} styleKit={{ color: { colorKey: CoreColorKey.Secondary, apply: { default: [ColorViewProperty.Bg] } }, roundKey: RoundKey.Sm }}>
+      {/* ★ 1. ScrollViewでラップして、横方向にはみ出さないようにする */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {options.map((option) => {
+          const isSelected = option.value === selectedValue;
+          return (
+            <BasePressable
+              key={option.value}
+              style={styles.button}
+              // ★ 2. styleKitを使って、選択状態のスタイルを適用
+              styleKit={{
+                color: { colorKey: isSelected ? CoreColorKey.Base : CoreColorKey.Secondary },
+                shadowKey: isSelected ? ShadowKey.SM : ShadowKey.None,
+                roundKey: RoundKey.Sm,
+              }}
+              onPress={() => onValueChange(option.value)}
+            >
+              <BaseText 
+                style={styles.text}
+                // ★ 3. 選択状態に応じてテキストの色も変更
+                styleKit={{ color: { colorKey: CoreColorKey.Base } }}
+              >
+                {option.label}
+              </BaseText>
+            </BasePressable>
+          );
+        })}
+      </ScrollView>
+    </BaseView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    // 背景色を少し暗くして、ボタンが浮き出るように見せる
-    backgroundColor: '#E5E5EA', 
-    borderRadius: 8,
-    overflow: 'hidden',
     padding: 2, // 内側に少し余白を持たせる
   },
+  scrollContent: {
+    flexDirection: 'row',
+  },
   button: {
-    flex: 1, // 各ボタンが均等に幅を持つようにする
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16, // 少し広めのパディング
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6, // 角を少し丸める
-  },
-  selectedButton: {
-    // 選択されているボタンは白くして、影をつける
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginHorizontal: 2, // ボタン間に少し余白
   },
   text: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#000',
-  },
-  selectedText: {
-    // 選択されているテキストの色は同じでも良い
-    color: '#000',
   },
 });

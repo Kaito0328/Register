@@ -12,7 +12,7 @@ export const CreateMemoButton: React.FC<Props> = ({
     onPress,
 }) => {
   return (
-    <Button onPress={onPress} viewStyleKit={{color: {colorKey: CoreColorKey.Primary, }, roundKey: RoundKey.None}}>
+    <Button onPress={onPress} viewStyleKit={{color: {colorKey: CoreColorKey.Success, }, roundKey: RoundKey.None}}>
         ＋ 新しいメモを作成
     </Button>
   );

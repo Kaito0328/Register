@@ -1,29 +1,27 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // アイコンライブラリの例
 import { BaseText } from '@/base/BaseText';
 import { CoreColorKey } from '@/styles/tokens/color';
 import { ComponentStatus } from '@/types/ComponentStatus';
-
-
+// ★★★ lucide-react-native と BaseIcon をインポート
+import { LoaderCircle, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import { BaseIcon } from '@/base/BaseIcon';
 
 type Props = {
   status: ComponentStatus;
   loadingMessage?: string;
   successMessage?: string;
   errorMessage?: string;
-  // アイドル状態でも高さを維持するかどうか
   keepHeightOnIdle?: boolean;
 };
 
 export const StatusMessage: React.FC<Props> = ({
   status,
-  loadingMessage = '処理中...', // デフォルトメッセージを設定
+  loadingMessage = '処理中...',
   successMessage = '成功しました',
   errorMessage = 'エラーが発生しました',
   keepHeightOnIdle = true,
 }) => {
-  // Idle状態の場合は何も表示しない
   if (status === ComponentStatus.Idle) {
     return keepHeightOnIdle ? <View style={styles.container} /> : null;
   }
@@ -33,15 +31,17 @@ export const StatusMessage: React.FC<Props> = ({
       case ComponentStatus.Loading:
         return (
           <>
-            <ActivityIndicator size="small" color="#666" style={styles.icon} />
+            {/* ★ BaseIconでローディングアイコンを表示 */}
+            <BaseIcon icon={LoaderCircle} style={styles.icon} />
             <BaseText style={styles.text}>{loadingMessage}</BaseText>
           </>
         );
       case ComponentStatus.Success:
         return (
           <>
-            <Ionicons name="checkmark-circle-outline" size={18} style={[styles.icon, styles.successIcon]} />
-            <BaseText style={[styles.text, styles.successText]} styleKit={{ color: { colorKey: CoreColorKey.Success } }}>
+            {/* ★ BaseIconで成功アイコンを表示 */}
+            <BaseIcon icon={CheckCircle2} style={styles.icon} styleKit={{ color: { colorKey: CoreColorKey.Success } }} />
+            <BaseText style={styles.successText} styleKit={{ color: { colorKey: CoreColorKey.Success } }}>
               {successMessage}
             </BaseText>
           </>
@@ -49,8 +49,9 @@ export const StatusMessage: React.FC<Props> = ({
       case ComponentStatus.Error:
         return (
           <>
-            <Ionicons name="alert-circle-outline" size={18} style={[styles.icon, styles.errorIcon]} />
-            <BaseText style={[styles.text, styles.errorText]} styleKit={{ color: { colorKey: CoreColorKey.Danger } }}>
+            {/* ★ BaseIconでエラーアイコンを表示 */}
+            <BaseIcon icon={AlertCircle} style={styles.icon} styleKit={{ color: { colorKey: CoreColorKey.Danger } }} />
+            <BaseText styleKit={{ color: { colorKey: CoreColorKey.Danger } }}>
               {errorMessage}
             </BaseText>
           </>
@@ -65,29 +66,19 @@ export const StatusMessage: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: 24, // 高さを固定してレイアウトのガタつきを防ぐ
+    height: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 8, // 上の要素との間に余白を追加
   },
   icon: {
     marginRight: 6,
   },
   text: {
     fontSize: 14,
-    color: '#666', // デフォルトの文字色
-  },
-  successIcon: {
-    color: '#28a745', // styleKitが適用される前のフォールバック
   },
   successText: {
-    fontWeight: 'bold',
-  },
-  errorIcon: {
-    color: '#dc3545',
-  },
-  errorText: {
-    // スタイルはstyleKitで適用
+    fontSize: 14,
   },
 });
-

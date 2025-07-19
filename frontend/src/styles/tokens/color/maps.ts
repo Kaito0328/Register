@@ -24,6 +24,11 @@ export const defaultColorViewMap: ColorViewMap = {
         [ColorViewProperty.Bg]: { backgroundColor: '#D32F2F' }, // エラーや警告用の赤
       },
     },
+    [CoreColorKey.Success]: {
+      [StyleState.Default]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#A8D8A4' }, // 成功や確認用の明るい緑
+      },  
+    },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
@@ -44,6 +49,11 @@ export const defaultColorViewMap: ColorViewMap = {
     [CoreColorKey.Danger]: {
       [StyleState.Default]: {
         [ColorViewProperty.Bg]: { backgroundColor: '#D32F2F' }, // エラーや警告用の赤
+      },
+    },
+    [CoreColorKey.Success]: {
+      [StyleState.Default]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#5C9B56' }, // 成功や確認用の深い緑
       },
     },
   },
@@ -69,6 +79,33 @@ export const pressableColorViewMap: ColorViewMap = {
         [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' },
       },
     },
+    [CoreColorKey.Base]: {
+      ...defaultColorViewMap[ThemeMode.Light][CoreColorKey.Base],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#C0D0C0' }, // 少し濃く
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' }, // 無効色
+      },
+    },
+    [CoreColorKey.Danger]: {
+      ...defaultColorViewMap[ThemeMode.Light][CoreColorKey.Danger],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#B32A2A' }, // 少し濃く
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' }, // 無効色
+      },
+    },
+    [CoreColorKey.Success]: {
+      ...defaultColorViewMap[ThemeMode.Light][CoreColorKey.Success],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#8AC88A' }, // 少し濃く
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#F0F5F0' }, // 無効色
+      },
+    },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
@@ -87,6 +124,33 @@ export const pressableColorViewMap: ColorViewMap = {
       },
       [StyleState.Disabled]: {
         [ColorViewProperty.Bg]: { backgroundColor: '#344034' }, // 【変更】無効色のトーンを調整
+      },
+    },
+    [CoreColorKey.Base]: {
+      ...defaultColorViewMap[ThemeMode.Dark][CoreColorKey.Base],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#5A6A5A' }, // 【変更】新しいBaseに合わせて調整
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#2A302A' }, // 【変更】無効色のトーンを調整
+      },
+    },
+    [CoreColorKey.Danger]: {
+      ...defaultColorViewMap[ThemeMode.Dark][CoreColorKey.Danger],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#B32A2A' }, // 少し濃く
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#2A302A' }, // 無効色
+      },
+    },
+    [CoreColorKey.Success]: {
+      ...defaultColorViewMap[ThemeMode.Dark][CoreColorKey.Success],
+      [StyleState.Pressed]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#5C9B56' },
+      },
+      [StyleState.Disabled]: {
+        [ColorViewProperty.Bg]: { backgroundColor: '#2A302A' }, // 無効色
       },
     },
   },
@@ -182,6 +246,11 @@ export const defaultColorTextMap: ColorTextMap = {
         [ColorTextProperty.Text]: { color: '#D32F2F' },
       },
     },
+    [CoreColorKey.Success]: {
+      [StyleState.Default]: {
+        [ColorTextProperty.Text]: { color: '#31c431ff' }, // 成功メッセージなど、Primaryと同じ色を使用
+      },
+    },
   },
   [ThemeMode.Dark]: {
     [CoreColorKey.Primary]: {
@@ -200,6 +269,11 @@ export const defaultColorTextMap: ColorTextMap = {
     [CoreColorKey.Danger]: {
       [StyleState.Default]: {
         [ColorTextProperty.Text]: { color: '#EF9A9A' },
+      },
+    },
+    [CoreColorKey.Success]: {
+      [StyleState.Default]: {
+        [ColorTextProperty.Text]: { color: '#31c431ff' }, // 成功メッセージなど、Primaryと同じ色を使用
       },
     },
   },

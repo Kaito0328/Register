@@ -64,7 +64,7 @@ export const LifecycleDisplay: React.FC<DisplayProps> = ({ lifecycle, expiresAt,
 
 const styles = StyleSheet.create({
   displayContainer: {
-    width: '100%',
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

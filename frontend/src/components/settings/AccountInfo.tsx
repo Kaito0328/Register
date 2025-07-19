@@ -6,13 +6,13 @@ import { BaseView } from '../../base/BaseView';
 // 将来的にユーザー情報をpropsで受け取る
 export const AccountInfo: React.FC = () => {
   return (
-    <BaseView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.avatar} /> 
       <View>
         <BaseText style={styles.name}>ゲストユーザー</BaseText>
         <BaseText style={styles.email}>ログインしていません</BaseText>
       </View>
-    </BaseView>
+    </View>
   );
 };
 

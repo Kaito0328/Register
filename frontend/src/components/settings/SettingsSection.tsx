@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BaseText } from '../../base/BaseText';
+import { BaseView } from '@/base/BaseView';
+import { CoreColorKey } from '@/styles/tokens';
 
 type Props = {
   title: string;
@@ -9,12 +11,12 @@ type Props = {
 
 export const SettingsSection: React.FC<Props> = ({ title, children }) => {
   return (
-    <View style={styles.container}>
-      <BaseText style={styles.title}>{title}</BaseText>
-      <View style={styles.content}>
+    <BaseView style={styles.container} styleKit={{ color: { colorKey: CoreColorKey.Secondary } }}>
+      <BaseText style={styles.title} styleKit={{color: {colorKey: CoreColorKey.Secondary}}}>{title}</BaseText>
+      <BaseView style={styles.content} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
         {children}
-      </View>
-    </View>
+      </BaseView>
+    </BaseView>
   );
 };
 
@@ -23,16 +25,10 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    paddingVertical: 10,
     paddingHorizontal: 20,
     marginBottom: 8,
-    color: 'gray',
   },
   content: {
-    backgroundColor: 'white', // テーマに応じて変更
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#e0e0e0',
   },
 });

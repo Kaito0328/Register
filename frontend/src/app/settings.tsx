@@ -4,14 +4,20 @@ import { Stack } from 'expo-router';
 import { AccountInfo } from '@/components/settings/AccountInfo';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { ThemeSettingItem } from '@/components/settings/ThemeSettingItem';
-import { DefaultLifecycleSettingItem } from '@/components/settings/DefaultLifecycleSettingItem';
+import { LifecycleSetting } from '@/components/Lifecycle/LifeCycleSetting';
+import { DefaultLifecycleSetting } from '@/components/Lifecycle/DefaultLifecycleSetting';
+import { useSettings } from '@/contexts/SettingsContext';
+import { BaseView } from '@/base/BaseView';
+import { CoreColorKey } from '@/styles/tokens';
 // 他の設定項目コンポーネントもインポート
 
 export default function SettingsScreen() {
+  const {settings, setDefaultLifecycle} = useSettings();
   return (
     <>
       <Stack.Screen options={{ title: '設定' }} />
       <ScrollView style={styles.container}>
+        <BaseView styleKit={{ color: { colorKey: CoreColorKey.Base}}}>
         <AccountInfo />
 
         <SettingsSection title="一般">
@@ -20,9 +26,12 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         <SettingsSection title="ノート">
-          <DefaultLifecycleSettingItem />
-          {/* <ConfirmDeleteSettingItem /> */}
+          <DefaultLifecycleSetting
+            defaultLifecycle={settings.defaultLifecycle}
+            saveDefaultLifecycle={setDefaultLifecycle}
+          />
         </SettingsSection>
+        </BaseView>
       </ScrollView>
     </>
   );
@@ -30,7 +39,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    ...StyleSheet.absoluteFillObject,
     flex: 1,
-    backgroundColor: '#f2f2f7', // テーマに応じて変更
   },
 });
