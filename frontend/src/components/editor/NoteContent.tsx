@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useNotes } from '@/contexts/NotesContext';
 import NoteEditor from './NoteEditor';
+import { StyleSheet, View } from 'react-native';
+import { CreationDateDisplay } from './CreationDateDisplay';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CharacterCount } from './CharacterCount';
 
 type Props = {
   noteId: string;
+  createdAt: number;
   initialText: string;
 };
 
@@ -12,10 +17,11 @@ export type NoteContentHandle = {
   getText: () => string;
 };
 
-export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initialText }, ref) => {
+export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, createdAt, initialText }, ref) => {
   const { updateNote } = useNotes();
   const [text, setText] = useState(initialText);
   const debounceTimer = useRef<number | null>(null);
+  const insets = useSafeAreaInsets();
 
   // ★★★ 最新のpropsとstateを保持するためのref
   const latestData = useRef({ noteId, initialText, text, updateNote });
@@ -58,9 +64,28 @@ export const NoteContent = forwardRef<NoteContentHandle, Props>(({ noteId, initi
   }, [initialText]);
 
   return (
-    <NoteEditor
-      text={text}
-      onChangeText={setText}
-    />
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <NoteEditor
+        text={text}
+        onChangeText={setText}
+      />
+      <View style={[styles.footer]}>
+        <CreationDateDisplay createdAt={createdAt} />
+        <CharacterCount text={text} />
+      </View>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, // 親要素いっぱいに広がる
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
 });

@@ -139,6 +139,7 @@ export default function NoteDetailScreen() {
           key={id}
           ref={contentRef}
           noteId={id}
+          createdAt={note.createdAt}
           initialText={note.text || ''}
         />
       </View>

@@ -63,12 +63,12 @@ export const useNotes = () => {
   }, [notes]);
 
   const updateNote = useCallback((id: string, updates: Partial<Note>) => {
-    console.log('updateNote called:', id, updates);
+    // console.log('updateNote called:', id, updates);
     setNotes((prev) => {
       const updated = prev.map((note) =>
         note.id === id ? { ...note, ...updates, updatedAt: Date.now() } : note
       );
-      console.log('Notes updated, count:', updated.length);
+      // console.log('Notes updated, count:', updated.length);
       return updated;
     });
   }, []);
