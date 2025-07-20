@@ -1,7 +1,6 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { ColorTextMap, ColorTextStyle, ColorTextStyleKit, ColorValueMap, ColorValueProperty, ColorValueStyle, ColorValueStyleKit, ColorViewMap, ColorViewProperty, ColorViewStyle, ColorViewStyleKit } from ".";
+import { ColorTextMap, ColorTextStyle, ColorTextStyleKit, ColorValueMap, ColorValueProperty, ColorValueStyleKit, ColorViewMap, ColorViewProperty, ColorViewStyle, ColorViewStyleKit } from "./types";
 import { useMemo } from "react";
-import { NonDefaultStates, StateFlags, StyleState } from "../../component";
+import { NonDefaultStates, StateFlags, StyleState } from "../../component/types";
 import { ColorValue } from "react-native";
 import { useSettings } from "@/contexts/SettingsContext";
 

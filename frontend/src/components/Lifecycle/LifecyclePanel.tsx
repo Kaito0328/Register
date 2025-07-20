@@ -1,92 +1,44 @@
-// components/Lifecycle/LifecyclePanel.tsx
-
-import React, { forwardRef, useImperativeHandle, useEffect, useRef, useState, useCallback } from "react";
+import React from "react";
 import { LayoutAnimation, StyleSheet, TouchableOpacity, View } from "react-native";
 import { BaseIcon } from "@/base/BaseIcon";
 import { ChevronDown } from "lucide-react-native";
-import { isTimeUnit, isValidLifecycle, getErrorMessage } from "@/utils/LifeCycleUtils";
 import { SizeKey } from "@/styles/tokens";
 import { LifecycleEditor } from "./LifeCycleEditor";
 import { NoteLifecycle } from "@/types/Note";
 
+// ★★★ 1. Propsの型をシンプルに変更
 type PanelProps = {
-  initialLifecycle: NoteLifecycle;
-  onSave: (lifecycle: NoteLifecycle) => void;
+  // 親が管理している現在のライフサイクルを受け取る
+  lifecycle: NoteLifecycle;
+  // 変更があったことを親に通知するための関数
+  onChangeLifecycle: (lifecycle: NoteLifecycle) => void;
   children: React.ReactNode;
-  isExpanded?: boolean; // ★ 1. isExpanded をオプションのpropとして追加
-  onToggleExpand?: () => void; // ★ 1. onToggleExpand をオプションのpropとして追加
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 };
 
-export type LifecyclePanelHandle = {
-  save: () => void;
-};
-
-export const LifecyclePanel = forwardRef<LifecyclePanelHandle, PanelProps>(({
-  initialLifecycle,
-  onSave,
+// ★★★ 2. forwardRef, useImperativeHandleを削除し、通常のコンポーネントに変更
+export const LifecyclePanel = ({
+  lifecycle,
+  onChangeLifecycle,
   children,
-  isExpanded: controlledIsExpanded, // ★ propを別名で受け取る
+  isExpanded, // isExpandedは親から制御されるので、内部stateは不要
   onToggleExpand,
-}, ref) => {
-  // ★ 2. 内部で展開状態を管理するstate
-  const [internalIsExpanded, setInternalIsExpanded] = useState(false);
+}: PanelProps) => {
 
-  // ★ 3. propsでisExpandedが渡されたらそれを使い、なければ内部のstateを使う
-  const isExpanded = controlledIsExpanded ?? internalIsExpanded;
+  // ★★★ 3. 内部のstate, ref, useEffectはすべて削除
 
-  const [lifecycle, setLifecycle] = useState<NoteLifecycle>(initialLifecycle);
-  const debounceTimer = useRef<number | null>(null);
-
-  const latestData = useRef({ lifecycle, onSave });
-  useEffect(() => {
-    latestData.current = { lifecycle, onSave };
-  });
-
-  const handleSave = useCallback((lifecycleOverride?: NoteLifecycle) => {
-    const { onSave } = latestData.current;
-    const lifecycleToSave = lifecycleOverride ?? latestData.current.lifecycle;
-      onSave(lifecycleToSave);
-  }, []);
-
-  useImperativeHandle(ref, () => ({
-    save: () => {
-      if (isTimeUnit(latestData.current.lifecycle.unit)) {
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        handleSave();
-      }
-    },
-  }));
   const handleToggleExpand = () => {
+    // LayoutAnimationはUIの見た目のためだけなので、そのままでOK
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (onToggleExpand) {
       onToggleExpand();
-    } else {
-      setInternalIsExpanded(prev => !prev);
     }
   };
 
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    if (!isTimeUnit(lifecycle.unit)) return;
-    debounceTimer.current = setTimeout(() => handleSave(), 1500);
-    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [lifecycle, handleSave]);
-
-  useEffect(() => {
-    if (!isExpanded && isTimeUnit(lifecycle.unit)) {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-      handleSave();
-    }
-  }, [isExpanded, handleSave]);
-
-  useEffect(() => {
-    setLifecycle(initialLifecycle);
-  }, [initialLifecycle]);
-
- return (
+  return (
     <View style={styles.container}>
       <View style={styles.headerTouchable}>
-        {/* ★★★ displayContainerはchildrenを横に並べるだけ */}
         <View style={styles.displayContainer}>
           {children}
         </View>
@@ -99,12 +51,13 @@ export const LifecyclePanel = forwardRef<LifecyclePanelHandle, PanelProps>(({
       {isExpanded && (
         <LifecycleEditor
           lifecycle={lifecycle}
-          setLifecycle={setLifecycle}
+          // ★★★ 4. 親から渡されたonChangeLifecycle関数を直接渡す
+          setLifecycle={onChangeLifecycle}
         />
       )}
     </View>
   );
-});
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -126,6 +79,5 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    // ★★★ justifyContentを削除
   },
 });

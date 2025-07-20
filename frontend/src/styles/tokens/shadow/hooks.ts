@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ShadowKey, ShadowMap, ShadowStyle } from './index';
+import { ShadowKey, ShadowMap, ShadowStyle } from './types';
 
 export const useShadowStyle = (key: ShadowKey, map: ShadowMap): ShadowStyle => {
   return useMemo(() => {

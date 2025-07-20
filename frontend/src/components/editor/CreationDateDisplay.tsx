@@ -27,9 +27,9 @@ export const CreationDateDisplay: React.FC<Props> = ({ createdAt }) => {
         作成日時: {formattedDate}
       </BaseText>
       {/* デバッグ用にcreatedAtの値を表示 */}
-      <BaseText style={styles.debugText} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
+      {/* <BaseText style={styles.debugText} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
         (createdAt: {createdAt})
-      </BaseText>
+      </BaseText> */}
     </View>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRoundStyle, useShadowStyle, useFontWeightStyle, useTextSizeStyle, useViewSizeStyle, useColorTextStyle, useColorViewStyle } from "../tokens";
-import { NonDefaultStates, PartialTextStyleKit, PartialViewStyleKit, StateFlags, StyleState, TextStyleKit, TextStyleMaps, TextStyles, ViewStyleKit, ViewStyleMaps, ViewStyles } from ".";
+import { NonDefaultStates, PartialTextStyleKit, PartialViewStyleKit, StateFlags, StyleState, TextStyleKit, TextStyleMaps, TextStyles, ViewStyleKit, ViewStyleMaps, ViewStyles } from "./types";
 import { StyleSheet, TextStyle, ViewStyle } from "react-native";
 import { mergeTextStyleKits, mergeViewStyleKits } from "./utils";
 

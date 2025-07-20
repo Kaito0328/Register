@@ -1,5 +1,5 @@
 import { ShadowKey, ShadowViewStyle, ShadowMap } from './types';
-import { StyleState } from '@/styles/component';
+import { StyleState } from '@/styles/component/types';
 
 // 影の具体的なスタイルを定数として定義しておくと、管理がしやすくなります。
 const SHADOW_COLOR = '#000000';

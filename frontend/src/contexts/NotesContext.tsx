@@ -10,6 +10,7 @@ type NotesContextType = {
   updateNote: (id: string, updateNote: Partial<Note>) => void;
   deleteNote: (id: string) => void;
   togglePin: (id: string) => void;
+  getTopNoteId: () => string | undefined; // ★★★ 追加: 最新のノートIDを取得する関数
   isLoaded: boolean;
 };
 

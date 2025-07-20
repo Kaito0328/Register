@@ -1,8 +1,5 @@
-// components/Lifecycle/SettingScreen.tsx
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useSettings } from '@/contexts/SettingsContext';
 import { NoteLifecycle, SpecialLifeCycleUnit } from '@/types/Note';
 import { getErrorMessage, isValidLifecycle } from '@/utils/LifeCycleUtils';
 import { LifecyclePanel } from './LifecyclePanel';
@@ -14,55 +11,74 @@ import { CoreColorKey } from '@/styles/tokens';
 
 type Props = {
   defaultLifecycle: NoteLifecycle;
-  saveDefaultLifecycle: (lifecycle: NoteLifecycle) => void;
+  saveDefaultLifecycle: (lifecycle: NoteLifecycle) => Promise<void> | void; // asyncを考慮
 };
 
-// ★ 1. 通常のReactコンポーネントとして正しく定義
-export const DefaultLifecycleSetting: React.FC<Props> = ({defaultLifecycle, saveDefaultLifecycle}) => {
+export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, saveDefaultLifecycle }) => {
+  // ★★★ 1. 編集中のライフサイクルを管理するためのstateを追加
+  const [lifecycle, setLifecycle] = useState<NoteLifecycle>(defaultLifecycle);
   const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = useCallback(async (lifecycle: NoteLifecycle) => {
+  // ★★★ 2. lifecycleのstateが変更されたら、自動で保存処理を実行するuseEffect
+  useEffect(() => {
+    // 初期値と同じ場合は、保存処理を実行しない
     if (lifecycle.unit === defaultLifecycle.unit && lifecycle.value === defaultLifecycle.value) {
       return;
     }
-          if (!isValidLifecycle(lifecycle)) {
+
+    const handleSave = async () => {
+      if (!isValidLifecycle(lifecycle)) {
         setError(getErrorMessage(lifecycle.unit));
         setSaveStatus(ComponentStatus.Error);
-        // 5秒後にアイドル状態に戻す
-        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000); 
+        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
         return;
       }
-    setSaveStatus(ComponentStatus.Loading);
-    setError(null);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await saveDefaultLifecycle(lifecycle);
-      setSaveStatus(ComponentStatus.Success);
-      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
-    } catch (e) {
-      setSaveStatus(ComponentStatus.Error);
-    }
-  }, [defaultLifecycle, saveDefaultLifecycle]);
+
+      setSaveStatus(ComponentStatus.Loading);
+      setError(null);
+      try {
+        await saveDefaultLifecycle(lifecycle);
+        setSaveStatus(ComponentStatus.Success);
+        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+      } catch (e) {
+        setSaveStatus(ComponentStatus.Error);
+        setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
+      }
+    };
+
+    // ユーザーの入力を少し待ってから保存を実行する（デバウンス）
+    const timer = setTimeout(() => {
+      handleSave();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [lifecycle, defaultLifecycle, saveDefaultLifecycle]);
+
+  // ★★★ 3. ノートが切り替わった時に、内部のstateも追従させる
+  useEffect(() => {
+    setLifecycle(defaultLifecycle);
+  }, [defaultLifecycle]);
 
   const handleSelectSpecialUnit = (unit: SpecialLifeCycleUnit) => {
-    handleSave({ unit, value: null });
+    // この関数は直接stateを更新する
+    setLifecycle({ unit, value: null });
   };
 
   return (
     <View style={styles.container}>
+      {/* ★★★ 4. 新しいPropsに合わせてLifecyclePanelを呼び出す */}
       <LifecyclePanel
-        initialLifecycle={defaultLifecycle}
-        onSave={handleSave}
-        isExpanded={true}
+        lifecycle={lifecycle}
+        onChangeLifecycle={setLifecycle}
+        isExpanded={true} // 設定画面では常に開いておく
       >
-
         <View style={styles.displayContent}>
           <BaseText styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
             デフォルトの保存期間
           </BaseText>
           <SpecialLifecycleSelector
-            lifecycle={defaultLifecycle}
+            lifecycle={lifecycle} // 表示も内部stateに合わせる
             onSelectSpecialUnit={handleSelectSpecialUnit}
           />
         </View>
@@ -78,7 +94,6 @@ export const DefaultLifecycleSetting: React.FC<Props> = ({defaultLifecycle, save
   );
 };
 
-// ★ スタイルを追加
 const styles = StyleSheet.create({
   container: {
     padding: 16,

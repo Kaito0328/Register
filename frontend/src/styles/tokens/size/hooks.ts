@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { SizeTextKit, SizeTextMap, SizeTextStyle, SizeViewKit, SizeViewMap, SizeViewStyle } from '.';
-import { StyleState } from '../../component';
+import { SizeTextKit, SizeTextMap, SizeTextStyle, SizeViewKit, SizeViewMap, SizeViewStyle } from './types';
+import { StyleState } from '../../component/types';
 import { TextStyle, ViewStyle } from 'react-native';
 
 export const useViewSizeStyle = (

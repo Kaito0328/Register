@@ -1,121 +1,211 @@
-// app/note/[id].tsx
-
-import React, { useState, useLayoutEffect, useEffect, useCallback, useRef, use, useMemo } from 'react';
-import { useNavigation, useLocalSearchParams, router, useFocusEffect } from 'expo-router';
-import { AppState, View, StyleSheet, Pressable, LayoutAnimation } from 'react-native';
+import React, { useState, useLayoutEffect, useEffect, useCallback, useMemo } from 'react';
+import { useNavigation, useLocalSearchParams, router } from 'expo-router';
+import { AppState, View, StyleSheet, Alert } from 'react-native';
 import { BaseText } from '@/base/BaseText';
 import { BaseView } from '@/base/BaseView';
 import { useNotes } from '@/contexts/NotesContext';
 import { NoteActionSheet } from '@/components/KebabMenu/NoteActionSheet';
-import { Note, NoteLifecycle } from '@/types/Note';
 import { CoreColorKey } from '@/styles/tokens';
+import { NoteLifecycle } from '@/types/Note';
 
-import { NoteHeaderTitle, type NoteHeaderTitleHandle } from '@/components/Header/NoteHeaderTitle';
+import { NoteHeaderTitle } from '@/components/Header/NoteHeaderTitle';
 import { NoteHeaderMenu } from '@/components/Header/NoteHeaderMenu';
-import { NoteContent, type NoteContentHandle } from '@/components/editor/NoteContent';
-import { LifecycleSetting, type LifecycleSettingHandle } from '@/components/Lifecycle/LifeCycleSetting';
+import { NoteContent } from '@/components/editor/NoteContent';
+import { usePrevious } from '@/hooks/usePrevious';
+import { LifecycleSetting } from '@/components/Lifecycle/LifeCycleSetting';
+import { ComponentStatus } from '@/types/ComponentStatus';
+import { StatusMessage } from '@/components/StatusMessage/StatusMessage';
+import { calculateExpiresAt } from '@/utils/LifeCycleUtils';
 
 export default function NoteDetailScreen() {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { findNoteById, deleteNote, notes } = useNotes();
+  const { findNoteById, deleteNote, updateNote, getTopNoteId, notes } = useNotes();
 
-  const note = useMemo(() => {
-    return findNoteById(id);
-  }, [id, notes, findNoteById]);
+  const note = useMemo(() => findNoteById(id), [id, findNoteById, notes]);
 
+  const [title, setTitle] = useState('');
+  const [text, setText] = useState('');
+  const [lifecycle, setLifecycle] = useState<NoteLifecycle | undefined>(undefined);
   const [menuVisible, setMenuVisible] = useState(false);
   const [isLifecycleExpanded, setIsLifecycleExpanded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  // ★★★ 子コンポーネントを操作するためのrefを準備
-  const titleRef = useRef<NoteHeaderTitleHandle>(null);
-  const contentRef = useRef<NoteContentHandle>(null);
-  const lifecycleRef = useRef<LifecycleSettingHandle>(null);
+  const prevNote = usePrevious(note);
+  const prevTitle = usePrevious(title);
+  const prevText = usePrevious(text);
+  const prevLifecycle = usePrevious(lifecycle);
 
-  const handleToggleExpand = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsLifecycleExpanded(prev => !prev);
-  }, []);
-
-  // ★★★ 親の役割は「全員に保存を命令する」ことだけ
-  const handleFinalSave = useCallback(() => {
-    console.log("Final save triggered for note ID:", id); // デバッグ用ログ
-    const currentText = contentRef.current?.getText();
-    titleRef.current?.save(currentText);
-    contentRef.current?.save();
-    lifecycleRef.current?.save();
-  }, [id]);
-
-  const handleDelete = () => {
-    if (!id) return;
-    deleteNote(id);
-    router.back();
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log(`Screen focused for note ID: ${id}`); // デバッグ用ログ
-      
-      // ★★★ このスクリーンからフォーカスが外れた時に実行されるクリーンアップ関数
-      return () => {
-        console.log(`Screen lost focus for note ID: ${id}, saving note...`); // デバッグ用ログ
-        handleFinalSave();
-      };
-    }, [handleFinalSave, id]) // idも依存配列に追加
-  );
-
-  // ★★★ ページから離れる直前の保存処理（beforeRemoveイベント）
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      console.log(`beforeRemove triggered for note ID: ${id}, saving note...`); // デバッグ用ログ
-      // 保存処理を実行
-      handleFinalSave();
-    });
+    if (note) {
+      setTitle(note.title);
+      setText(note.text || '');
+      setLifecycle(note.lifecycle);
+    }
+  }, [note]);
 
-    return unsubscribe;
-  }, [navigation, handleFinalSave, id]);
+  useEffect(() => {
+    if (prevNote && prevNote.id !== note?.id) {
+      const titleDirty = prevTitle !== prevNote.title || (prevTitle || '').trim() === '';
+      const textDirty = prevText !== (prevNote.text || '');
+      const lifecycleDirty = JSON.stringify(prevLifecycle) !== JSON.stringify(prevNote.lifecycle);
 
-  // // ★★★ ノートIDが変更された時の保存処理
-  // const prevIdRef = useRef<string | undefined>(id);
-  // useEffect(() => {
-  //   if (prevIdRef.current && prevIdRef.current !== id) {
-  //     console.log(`Note ID changed from ${prevIdRef.current} to ${id}, saving previous note...`); // デバッグ用ログ
-  //     // 前のノートの保存を即座に実行
-  //     handleFinalSave();
-  //   }
-  //   prevIdRef.current = id;
-  // }, [id, handleFinalSave]);
+      if (!titleDirty && !textDirty && !lifecycleDirty) return;
+
+      const runSave = async () => {
+        setSaveStatus(ComponentStatus.Loading);
+        try {
+          const finalTitle = (prevTitle || '').trim() === '' ? (prevText || '').trim().substring(0, 20) || '無題のメモ' : (prevTitle || '');
+          await updateNote(prevNote.id, {
+            title: finalTitle,
+            text: prevText || '',
+            lifecycle: prevLifecycle,
+          });
+          setSaveStatus(ComponentStatus.Success);
+          setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+        } catch (error) {
+          setSaveStatus(ComponentStatus.Error);
+          setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
+        }
+      };
+      runSave();
+    }
+  }, [note, prevNote, prevTitle, prevText, prevLifecycle, updateNote]);
+
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle);
+  }, []);
 
   useLayoutEffect(() => {
     if (!note) return;
     navigation.setOptions({
       headerTitle: () => (
-        <NoteHeaderTitle key={note.id} ref={titleRef} noteId={note.id} initialTitle={note.title} />
+        <NoteHeaderTitle
+          key={note.id}
+          initialTitle={note.title}
+          onTitleChange={handleTitleChange}
+        />
       ),
       headerRight: () => (
         <NoteHeaderMenu onPress={() => setMenuVisible(true)} />
       ),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, note]);
-  
+  }, [navigation, note, handleTitleChange]);
+
+  const saveCurrentNoteIfNeeded = useCallback(async () => {
+    if (!note) return;
+    const titleDirty = title !== note.title || title.trim() === '';
+    const textDirty = text !== (note.text || '');
+    const lifecycleDirty = JSON.stringify(lifecycle) !== JSON.stringify(note.lifecycle);
+
+    if (!titleDirty && !textDirty && !lifecycleDirty) return;
+    setSaveStatus(ComponentStatus.Loading);
+
+    try {
+      const finalTitle = title.trim() === '' ? text.trim().substring(0, 20) || '無題のメモ' : title;
+      await updateNote(note.id, { title: finalTitle, text, lifecycle });
+      setSaveStatus(ComponentStatus.Success);
+      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+    } catch (error) {
+      console.error("Failed to save note:", error);
+      setSaveStatus(ComponentStatus.Error);
+      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
+    }
+  }, [note, title, text, lifecycle, updateNote]);
+
+  const handleDebounceSave = useCallback(async () => {
+    if (!note) return;
+    const titleDirty = title !== note.title;
+    const textDirty = text !== (note.text || '');
+    const lifecycleDirty = JSON.stringify(lifecycle) !== JSON.stringify(note.lifecycle);
+
+    if (!titleDirty && !textDirty && !lifecycleDirty) return;
+    setSaveStatus(ComponentStatus.Loading);
+
+    try {
+      await updateNote(note.id, { title, text, lifecycle, expiresAt: lifecycle ?  calculateExpiresAt(lifecycle, note.createdAt) : undefined });
+      setSaveStatus(ComponentStatus.Success);
+      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
+    } catch (error) {
+      console.error("Failed to auto-save note:", error);
+      setSaveStatus(ComponentStatus.Error);
+      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
+    }
+  }, [note, title, text, lifecycle, updateNote]);
+
+  // ★★★ デバウンスのuseEffectを修正
+  useEffect(() => {
+    if (!note) return;
+
+    // ★★★ 1. lifecycleの変更もチェックに含める
+    const isDirty = title !== note.title || text !== (note.text || '') || JSON.stringify(lifecycle) !== JSON.stringify(note.lifecycle);
+    if (!isDirty) return;
+
+    const handler = setTimeout(() => {
+      console.log('[Debounce] 自動保存を実行します。');
+      handleDebounceSave();
+    }, 2000);
+
+    return () => clearTimeout(handler);
+  // ★★★ 2. 依存配列にlifecycleを追加
+  }, [title, text, lifecycle, note, handleDebounceSave]);
+
+
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState.match(/inactive|background/)) {
-        console.log('App going to background, saving note...'); // デバッグ用ログ
-        handleFinalSave();
+        saveCurrentNoteIfNeeded();
       }
     });
-    
-    // ★★★ コンポーネントのアンマウント時にも保存
-    return () => {
-      console.log('Component unmounting, saving note...'); // デバッグ用ログ
-      subscription.remove();
-      handleFinalSave();
-    };
-  }, [handleFinalSave]);
+    return () => subscription.remove();
+  }, [saveCurrentNoteIfNeeded]);
 
-  if (!note) {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!note) return;
+      const titleDirty = title !== note.title;
+      const textDirty = text !== (note.text || '');
+      const lifecycleDirty = JSON.stringify(lifecycle) !== JSON.stringify(note.lifecycle);
+
+      if (!titleDirty && !textDirty && !lifecycleDirty) return;
+
+      e.preventDefault();
+      Alert.alert('変更が保存されていません', 'このままページを離れますか？', [
+        { text: "キャンセル", style: 'cancel' },
+        { text: '変更を破棄', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        { text: '保存して移動', style: 'default', onPress: () => {
+            saveCurrentNoteIfNeeded();
+            navigation.dispatch(e.data.action);
+          }},
+      ]);
+    });
+    return unsubscribe;
+  }, [navigation, note, title, text, lifecycle, saveCurrentNoteIfNeeded]);
+
+  const handleDelete = () => {
+    if (!id) return;
+    deleteNote(id);
+    router.replace('/');
+  };
+  
+  const handleToggleExpand = useCallback(() => {
+    setIsLifecycleExpanded(prev => !prev);
+  }, []);
+
+  const setError = useCallback((error: string | null) => {
+    setValidationError(error);
+    if (error) {
+      setSaveStatus(ComponentStatus.Error);
+      setTimeout(() => {
+        setSaveStatus(ComponentStatus.Idle);
+        // エラーメッセージもクリアする
+        setValidationError(null);
+      }, 5000);
+    }
+  }, [setValidationError, setSaveStatus]);
+
+  if (!note || !lifecycle) {
     return <BaseView style={styles.container}><BaseText>ノートが見つかりません。</BaseText></BaseView>;
   }
 
@@ -123,31 +213,27 @@ export default function NoteDetailScreen() {
     <BaseView style={styles.container} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
       <View style={styles.settingWrapper}>
         <LifecycleSetting
-          key={id}
-          noteId={id}
-          createdAt={note.createdAt}
-          ref={lifecycleRef}
-          noteLifecycle={note.lifecycle}
+          lifecycle={lifecycle}
+          onChangeLifecycle={setLifecycle}
           expiresAt={note.expiresAt}
           isExpanded={isLifecycleExpanded}
           onToggleExpand={handleToggleExpand}
+          onValidationFailure={setError} 
         />
       </View>
-
+      <StatusMessage
+        status={saveStatus}
+        loadingMessage="保存中..."
+        successMessage="保存済み"
+        errorMessage={validationError || "保存に失敗しました"}
+      />
       <View style={styles.contentWrapper}>
         <NoteContent
-          key={id}
-          ref={contentRef}
-          noteId={id}
+          text={text}
+          onChangeText={setText}
           createdAt={note.createdAt}
-          initialText={note.text || ''}
         />
       </View>
-
-      {isLifecycleExpanded && (
-        <Pressable style={styles.backdrop} onPress={handleToggleExpand} />
-      )}
-
       <NoteActionSheet
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
@@ -159,19 +245,7 @@ export default function NoteDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentWrapper: {
-    flex: 1,
-    width: '100%',
-  },
-  settingWrapper: {
-    zIndex: 100,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    zIndex: 99,
-  },
+  container: { flex: 1 },
+  contentWrapper: { flex: 1, width: '100%' },
+  settingWrapper: { zIndex: 100 }
 });

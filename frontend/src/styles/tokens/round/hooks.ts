@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ViewStyle } from 'react-native';
-import { RoundKey, RoundMap } from './index'; // 型定義は別ファイルと仮定
+import { RoundKey, RoundMap } from './types'; // 型定義は別ファイルと仮定
 
 export const useRoundStyle = (
   map: RoundMap,

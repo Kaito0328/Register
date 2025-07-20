@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Modal, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Modal, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { BaseText } from '../../base/BaseText';
 import { Note } from '@/types/Note';
 import { useNotes } from '@/contexts/NotesContext';
 import { router } from 'expo-router';
-import { Alert } from 'react-native';
+import { BaseView } from '@/base/BaseView'; // ★ BaseViewをインポート
+import { CoreColorKey } from '@/styles/tokens'; // ★ BorderKeyをインポート
 
 type Props = {
   note: Note;
@@ -13,7 +14,10 @@ type Props = {
 // メニューの各項目
 const MenuItem: React.FC<{ label: string; onPress: () => void; isDestructive?: boolean }> = ({ label, onPress, isDestructive }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-    <BaseText style={{ color: isDestructive ? 'red' : 'black' }}>{label}</BaseText>
+    {/* ★ destructiveの判定をstyleKitに移行 */}
+    <BaseText styleKit={{ color: { colorKey: isDestructive ? CoreColorKey.Danger : CoreColorKey.Primary } }}>
+      {label}
+    </BaseText>
   </TouchableOpacity>
 );
 
@@ -26,14 +30,8 @@ export const ThreeDotMenu: React.FC<Props> = ({ note }) => {
     setModalVisible(false);
   };
 
-  const handleSetLifecycle = () => {
-    // ここでライフサイクル選択用のUI（別のモーダルなど）を開く
-    Alert.alert("ライフサイクル設定", "（この機能は現在開発中です）");
-    setModalVisible(false);
-  };
-
   const handleDelete = () => {
-    setModalVisible(false); // 先にモーダルを閉じる
+    setModalVisible(false);
     Alert.alert(
       "ノートを削除",
       "このノートを本当に削除しますか？",
@@ -64,15 +62,21 @@ export const ThreeDotMenu: React.FC<Props> = ({ note }) => {
         onRequestClose={() => setModalVisible(false)}
       >
         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
-          <View style={styles.menuContainer}>
+          {/* ★★★ ViewをBaseViewに変更し、styleKitで見た目を定義 */}
+          <BaseView 
+            style={styles.menuContainer}
+            styleKit={{
+              color: { colorKey: CoreColorKey.Base },
+            }}
+          >
             <MenuItem
               label={note.isPinned ? "ピンを外す" : "ピン留めする"}
               onPress={handleTogglePin}
             />
-            <MenuItem label="ライフサイクル設定" onPress={handleSetLifecycle} />
-            <View style={styles.divider} />
+            {/* ★★★ 区切り線もBaseViewに変更 */}
+            <BaseView style={styles.divider} styleKit={{ color: { colorKey: CoreColorKey.Secondary } }}/>
             <MenuItem label="削除" onPress={handleDelete} isDestructive />
-          </View>
+          </BaseView>
         </Pressable>
       </Modal>
     </>
@@ -90,17 +94,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   menuContainer: {
-    marginTop: 60, // ヘッダーの高さに応じて調整
+    marginTop: 60,
     marginRight: 10,
-    backgroundColor: 'white',
-    borderRadius: 8,
     padding: 8,
     minWidth: 180,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    // ★★★ borderRadiusとshadow関連のスタイルを削除
   },
   menuItem: {
     paddingVertical: 12,
@@ -108,7 +106,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
     marginVertical: 4,
+    // ★★★ backgroundColorを削除 (styleKitで制御するため)
   },
 });

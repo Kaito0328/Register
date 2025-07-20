@@ -1,113 +1,71 @@
-// components/Lifecycle/LifecycleSetting.tsx
-
-import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
-import { useNotes } from '@/contexts/NotesContext';
+import React, { useCallback } from 'react';
 import { NoteLifecycle, SpecialLifeCycleUnit } from '@/types/Note';
-import { calculateExpiresAt, getErrorMessage, isValidLifecycle } from '@/utils/LifeCycleUtils';
+import { getErrorMessage, isValidLifecycle } from '@/utils/LifeCycleUtils';
 import { RemainingTimeDisplay } from './RemainingTimeDisplay';
 import { SpecialLifecycleSelector } from './SpecialLifecycleSelector';
-import { StatusMessage } from '../StatusMessage/StatusMessage';
-import { ComponentStatus } from '@/types/ComponentStatus';
-import { LifecyclePanel, LifecyclePanelHandle } from './LifecyclePanel';
+import { LifecyclePanel } from './LifecyclePanel';
 import { View, StyleSheet } from 'react-native';
 
-type SettingProps = {
-  noteId: string;
-  createdAt: number;
-  noteLifecycle: NoteLifecycle;
+type Props = {
+  lifecycle: NoteLifecycle;
+  onChangeLifecycle: (lifecycle: NoteLifecycle) => void;
   expiresAt: number | null;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
+  onValidationFailure: (error: string | null) => void;
 };
 
-export type LifecycleSettingHandle = {
-  save: () => void;
-};
-
-export const LifecycleSetting = forwardRef<LifecycleSettingHandle, SettingProps>(({
-  noteId,
-  createdAt,
-  noteLifecycle,
+export const LifecycleSetting = ({
+  lifecycle,
+  onChangeLifecycle,
   expiresAt,
   isExpanded,
   onToggleExpand,
-}, ref) => {
-  const { updateNote } = useNotes();
-  const [error, setError] = useState<string | null>(null);
-  const panelRef = useRef<LifecyclePanelHandle>(null);
-  const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
+  onValidationFailure,
+}: Props) => {
 
-  // ★★★ ここのロジックを修正 ★★★
-  const handleSave = useCallback(async (lifecycle: NoteLifecycle) => {
-    if (!isValidLifecycle(lifecycle)) {
-      setError(getErrorMessage(lifecycle.unit));
-      setSaveStatus(ComponentStatus.Error);
-      // 5秒後にアイドル状態に戻す
-      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000); 
-      return;
+  // ★★★ ロジックの順番を修正
+  const handleLifecycleChange = useCallback((newLifecycle: NoteLifecycle) => {
+    // ★ 1. まず親のstateを更新して、UIに即時反映させる
+    onChangeLifecycle(newLifecycle);
+
+    // ★ 2. その後で、新しい状態のバリデーションを行う
+    if (!isValidLifecycle(newLifecycle)) {
+      // 不正な場合は、エラーメッセージを親に通知する
+      const errorMessage = getErrorMessage(newLifecycle.unit);
+      onValidationFailure(errorMessage);
+    } else {
+      // 正常な場合は、エラーメッセージをクリアする
+      onValidationFailure(null);
     }
+  }, [onChangeLifecycle, onValidationFailure]);
 
-    // 1. まずステータスを「Loading」に設定
-    setSaveStatus(ComponentStatus.Loading);
-    setError(null);
-
-    try {
-      // 意図的に500ms待ってから更新処理を実行
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newExpiresAt = calculateExpiresAt(lifecycle, createdAt);
-      await updateNote(noteId, { lifecycle, expiresAt: newExpiresAt });
-
-      // 2. 成功したらステータスを「Success」に設定
-      setSaveStatus(ComponentStatus.Success);
-
-      // 3. さらに2秒後にステータスを「Idle」に戻す
-      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
-
-    } catch (err) {
-      setSaveStatus(ComponentStatus.Error);
-      // 5秒後にアイドル状態に戻す
-      setTimeout(() => setSaveStatus(ComponentStatus.Idle), 5000);
-    }
-  }, [noteId, createdAt, updateNote]);
-
-  useImperativeHandle(ref, () => ({
-    save: () => panelRef.current?.save(),
-  }));
 
   const handleSelectSpecialUnit = (unit: SpecialLifeCycleUnit) => {
-    handleSave({ unit, value: null });
+    // この関数は handleLifecycleChange を呼ぶので、自動的に新しいロジックが適用される
+    handleLifecycleChange({ unit, value: null });
   };
 
   return (
     <View style={styles.container}>
+      {/* ★★★ LifecyclePanelに渡すpropsを修正 */}
       <LifecyclePanel
-        ref={panelRef}
-        initialLifecycle={noteLifecycle}
-        onSave={handleSave}
+        lifecycle={lifecycle}
+        onChangeLifecycle={handleLifecycleChange}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
       >
         <View style={styles.displayContent}>
-          <RemainingTimeDisplay
-            expiresAt={expiresAt}
-          />
+          <RemainingTimeDisplay expiresAt={expiresAt} />
         </View>
         <SpecialLifecycleSelector
-          lifecycle={noteLifecycle}
+          lifecycle={lifecycle}
           onSelectSpecialUnit={handleSelectSpecialUnit}
         />
       </LifecyclePanel>
-      
-      <StatusMessage
-        status={saveStatus}
-        loadingMessage="保存中..."
-        successMessage="保存済み"
-        errorMessage={error || '保存に失敗しました。'}
-      />
     </View>
   );
-});
+};
 
 const styles = StyleSheet.create({
   container: {

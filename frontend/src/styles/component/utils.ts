@@ -1,5 +1,3 @@
-// style/component/utils.ts または hooks.ts の上部
-
 import { ViewStyleKit, TextStyleKit, PartialViewStyleKit, PartialTextStyleKit } from './types';
 
 // ViewStyleKit用のマージ関数

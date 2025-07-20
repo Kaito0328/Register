@@ -27,10 +27,6 @@ type EditorProps = {
  */
 export const LifecycleEditor: React.FC<EditorProps> = ({ setLifecycle, lifecycle }) => {
 
-  const setUnit = (unit: LifecycleUnit) => {
-    setLifecycle({ ...lifecycle, unit });
-  };
-
   const setValue = (value: number | null) => {
     setLifecycle({ ...lifecycle, value });
   };
@@ -41,7 +37,6 @@ export const LifecycleEditor: React.FC<EditorProps> = ({ setLifecycle, lifecycle
   };
 
   const handleUnitSelect = (selectedUnit: LifecycleUnit) => {
-    console.log('Selected unit:', selectedUnit);
     setLifecycle({unit: selectedUnit, value: null});
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };

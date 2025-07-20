@@ -1,5 +1,5 @@
-import { SizeKey, SizeTextMap, SizeTextProperty, SizeViewMap, SizeViewProperty } from ".";
-import { StyleState } from "../../component";
+import { SizeKey, SizeTextMap, SizeTextProperty, SizeViewMap, SizeViewProperty } from "./types";
+import { StyleState } from "../../component/types";
 
 export const defaultSizeViewMap: SizeViewMap = {
   [SizeKey.SM]: {

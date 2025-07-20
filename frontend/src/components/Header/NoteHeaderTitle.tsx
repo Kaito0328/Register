@@ -1,90 +1,44 @@
-// components/Header/NoteHeaderTitle.tsx
-
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BaseTextInput } from '@/base/BaseTextInput';
-import { CoreColorKey, RoundKey, SizeKey } from '@/styles/tokens';
-import { useNotes } from '@/contexts/NotesContext';
+import { ColorViewProperty, CoreColorKey, RoundKey, SizeKey } from '@/styles/tokens';
 
 type Props = {
-  noteId: string;
+  // 親が持つ「公式の」タイトルを初期値として受け取る
   initialTitle: string;
+  // 親の「公式の」タイトルを更新するための関数
+  onTitleChange: (newTitle: string) => void;
 };
 
-// ★★★ 親から命令を受け取るためのハンドルの型を定義
-export type NoteHeaderTitleHandle = {
-  save: (currentText?: string) => void;
-};
-
-// ★★★ forwardRefでコンポーネントをラップ
-export const NoteHeaderTitle = forwardRef<NoteHeaderTitleHandle, Props>(({ noteId, initialTitle }, ref) => {
-  const { updateNote } = useNotes();
-  const [title, setTitle] = useState(initialTitle);
+export const NoteHeaderTitle = React.memo(({ initialTitle, onTitleChange }: Props) => {
+  // ★★★ ユーザーの入力をリアルタイムに反映するための内部的なstate
+  const [localTitle, setLocalTitle] = useState(initialTitle);
   const debounceTimer = useRef<number | null>(null);
 
-  const latestData = useRef({ noteId, initialTitle, title, updateNote });
+  // ★★★ ノートが切り替わった時（initialTitleが変わった時）に内部のstateも更新
   useEffect(() => {
-    latestData.current = { noteId, initialTitle, title, updateNote };
-  });
+    setLocalTitle(initialTitle);
+  }, [initialTitle]);
 
-  const handleFinalSave = useCallback((currentText?: string) => {
-    const { noteId, initialTitle, title, updateNote } = latestData.current;
-    let finalTitle = title;
-
-    // タイトルが空の場合、渡された本文からタイトルを生成
-    if (finalTitle.trim() === '') {
-      finalTitle = currentText?.trim().substring(0, 20) || '無題のメモ';
-    }
-
-    // 最終的なタイトルで保存を実行
-    if (finalTitle !== initialTitle) {
-      updateNote(noteId, { title: finalTitle });
-    }
-  }, []);
-
-    const handleSave = useCallback(() => {
-    const { noteId, initialTitle, title, updateNote } = latestData.current;
-    if (title.trim() !== initialTitle) {
-      updateNote(noteId, { title });
-    }
-  }, []);
-
-  // ★★★ 親に 'save' という名前で handleSave 関数を公開する
-  useImperativeHandle(ref, () => ({
-    save: handleFinalSave,
-    getTitle: () => { return latestData.current.title; },
-  }));
-
-  // 2秒間のデバウンスによる自動保存
+  // ★★★ ユーザーが入力するたびに、親への通知を500ms遅延させる（デバウンス）
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
     debounceTimer.current = setTimeout(() => {
-      handleSave();
-    }, 2000);
+      // ユーザーの入力が500ms止まったら、親のstateを更新する
+      onTitleChange(localTitle);
+    }, 500);
+
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [title, handleSave]);
-
-  // ★★★ noteIdが変更された時にデバウンスタイマーをクリア
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-        debounceTimer.current = null;
-      }
-    };
-  }, [noteId]);
-  
-  // note.titleが外部から変更された場合に同期する
-  useEffect(() => {
-    setTitle(initialTitle);
-  }, [initialTitle]);
+  }, [localTitle, onTitleChange]);
 
   return (
     <BaseTextInput
-      value={title}
-      onChangeText={setTitle}
-      viewStyleKit={{ color: { colorKey: CoreColorKey.Primary }, size: { sizeKey: SizeKey.LG }, roundKey: RoundKey.None }}
+      value={localTitle} // 内部のstateをvalueに設定
+      onChangeText={setLocalTitle} // 入力中は内部のstateだけを更新
+      viewStyleKit={{ color: { colorKey: CoreColorKey.Secondary, apply: {default:[ColorViewProperty.Bg,], focus: [ColorViewProperty.Bg, ColorViewProperty.Border]} }, size: { sizeKey: SizeKey.LG }, roundKey: RoundKey.None }}
+      textStyleKit={{color: {colorKey: CoreColorKey.Base}}}
       style={{ textAlign: 'center', width: 200 }}
       placeholder="タイトル"
     />

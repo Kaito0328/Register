@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BaseText } from '../../base/BaseText';
 import { BaseView } from '@/base/BaseView';
-import { CoreColorKey } from '@/styles/tokens';
+import { CoreColorKey, FontWeightKey, SizeKey } from '@/styles/tokens';
 
 type Props = {
   title: string;
@@ -12,7 +12,7 @@ type Props = {
 export const SettingsSection: React.FC<Props> = ({ title, children }) => {
   return (
     <BaseView style={styles.container} styleKit={{ color: { colorKey: CoreColorKey.Secondary } }}>
-      <BaseText style={styles.title} styleKit={{color: {colorKey: CoreColorKey.Secondary}}}>{title}</BaseText>
+      <BaseText style={styles.title} styleKit={{color: {colorKey: CoreColorKey.Secondary}, size: {sizeKey: SizeKey.LG}, fontWeightKey: FontWeightKey.Bold}}>{title}</BaseText>
       <BaseView style={styles.content} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
         {children}
       </BaseView>

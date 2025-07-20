@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { TextStyle } from 'react-native';
-import { FontWeightKey, FontWeightMap } from './index'; // 型定義は別ファイルと仮定
+import { FontWeightKey, FontWeightMap } from './types'; // 型定義は別ファイルと仮定
 
 export const useFontWeightStyle = (
   map: FontWeightMap,
