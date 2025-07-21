@@ -1,7 +1,6 @@
 // https://docs.expo.dev/guides/using-eslint/
 module.exports = {
   extends: ['expo'],
-  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -10,7 +9,8 @@ module.exports = {
     sourceType: 'module',
   },
   env: {
-    'react-native/react-native': true,
+    node: true,
+    es6: true,
   },
   rules: {
     // カスタムルールがあればここに追加
