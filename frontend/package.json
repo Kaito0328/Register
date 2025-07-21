@@ -7,7 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "npx eslint .",
+    "lint": "npx eslint -c .eslintrc.js . --ext .js,.jsx,.ts,.tsx",
     "dev": "expo start",
     "test": "jest",
     "test:watch": "jest --watch",
