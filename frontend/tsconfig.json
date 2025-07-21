@@ -13,6 +13,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "src/components/StatusMessage"  ]
+    "expo-env.d.ts",
+    "src/components/StatusMessage",
+    "setupTests.js",
+    "jest.config.js"
+, "src/utils/test-utils.tsx"  ]
 }

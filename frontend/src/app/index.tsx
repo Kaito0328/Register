@@ -32,7 +32,7 @@ export default function IndexScreen() {
   // 実際の画面遷移はuseFocusEffectが担当してくれます
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" />
+      <ActivityIndicator size="large" testID="loading-indicator" />
     </View>
   );
 }

@@ -9,7 +9,11 @@ type Props = {
 
 export const CharacterCount: React.FC<Props> = ({ text }) => {
   return (
-    <BaseText style={styles.text} styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
+    <BaseText 
+      style={styles.text} 
+      styleKit={{ color: { colorKey: CoreColorKey.Base } }}
+      testID="character-count"
+    >
       文字数: {text.length}
     </BaseText>
   );
