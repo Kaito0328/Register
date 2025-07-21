@@ -1,13 +1,14 @@
 module.exports = {
   // 'eslint-config-expo'を基本的なルールセットとして使用します
+  // これがReact, React Native, Expoに関する基本的なルールをすべて含んでいます
   extends: 'expo',
+  
   // TypeScriptのファイルを正しく解析するための設定
   parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-  ],
+  
+  // ルールを上書きしたり、追加したりできます
   rules: {
-    // ここに、プロジェクト独自のルールを追加できます
-    // 例: 'react/prop-types': 'off', // propsの型チェックをTypeScriptに任せる
+    // 例: propsの型チェックをTypeScriptに任せるので、ESLintのルールはオフにする
+    'react/prop-types': 'off', 
   },
 };
