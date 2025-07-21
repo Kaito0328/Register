@@ -1,9 +1,19 @@
 // https://docs.expo.dev/guides/using-eslint/
-const expoConfig = require('eslint-config-expo/flat');
-
-module.exports = [
-  ...expoConfig,
-  {
-    ignores: ['dist/*'],
+module.exports = {
+  extends: ['expo'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 2021,
+    sourceType: 'module',
   },
-];
+  env: {
+    'react-native/react-native': true,
+  },
+  rules: {
+    // カスタムルールがあればここに追加
+  },
+  ignorePatterns: ['dist/*', 'node_modules/*'],
+};
