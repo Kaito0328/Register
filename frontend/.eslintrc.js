@@ -11,9 +11,19 @@ module.exports = {
   env: {
     node: true,
     es6: true,
+    jest: true,
   },
   rules: {
-    // カスタムルールがあればここに追加
+    // 未使用変数の警告を軽減
+    '@typescript-eslint/no-unused-vars': ['warn', { 
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_'
+    }],
+    // React display nameを必須としない
+    'react/display-name': 'off',
+    // exhaustive-depsを警告レベルに
+    'react-hooks/exhaustive-deps': 'warn',
   },
   ignorePatterns: ['dist/*', 'node_modules/*'],
 };
