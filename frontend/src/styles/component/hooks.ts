@@ -15,12 +15,17 @@ export const useViewStyles = (
   const finalKit = mergeViewStyleKits(defaultKit, overrideKit);
 
   const colorStyles = useColorViewStyle(finalKit.color, maps.color);
-  const sizeStyles = (finalKit.size) ? useViewSizeStyle(finalKit.size, maps.size) : {};
-  // kitとmapの両方が存在する場合のみ、スタイルを生成する
-  const shadowStyles = (finalKit.shadowKey && maps.shadow) 
-    ? useShadowStyle(finalKit.shadowKey, maps.shadow) : {};
-  const roundStyle = (finalKit.roundKey && maps.round) 
-    ? useRoundStyle(maps.round, finalKit.roundKey) : {};
+  
+  // 常にhookを呼び出し、結果を条件で使い分ける
+  // undefinedの場合はデフォルト値を提供
+  const allSizeStyles = useViewSizeStyle(finalKit.size || {} as any, maps.size);
+  const sizeStyles = finalKit.size ? allSizeStyles : {};
+  
+  const allShadowStyles = useShadowStyle(finalKit.shadowKey || '' as any, maps.shadow || {} as any);
+  const shadowStyles = (finalKit.shadowKey && maps.shadow) ? allShadowStyles : {};
+  
+  const allRoundStyles = useRoundStyle(maps.round || {} as any, finalKit.roundKey || '' as any);
+  const roundStyle = (finalKit.roundKey && maps.round) ? allRoundStyles : {};
 
 
   return useMemo(() => {
@@ -57,7 +62,10 @@ export const useTextStyles = (
   // 2. 各パーツのスタイルを、状態ごとのマップとして取得
   const colorStyles = useColorTextStyle(finalKit.color, maps.color);
   const sizeStyles = useTextSizeStyle(finalKit.size, maps.size);
-  const fontWeightStyle = finalKit.fontWeightKey ? useFontWeightStyle(maps.fontWeight, finalKit.fontWeightKey) : {};
+  
+  // 常にhookを呼び出し、結果を条件で使い分ける
+  const allFontWeightStyles = useFontWeightStyle(maps.fontWeight || {} as any, finalKit.fontWeightKey || '' as any);
+  const fontWeightStyle = finalKit.fontWeightKey ? allFontWeightStyles : {};
 
   return useMemo(() => {
     const allStates = [

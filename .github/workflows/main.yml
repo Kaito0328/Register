@@ -1,0 +1,52 @@
+# .github/workflows/main.yml
+
+name: Expo App CI/CD
+
+on:
+  push:
+    # ★★★ mainとfrontend/testブランチにプッシュされた時に実行 ★★★
+    branches: [ main, frontend/test ]
+  pull_request:
+    # ★★★ mainとfrontend/testブランチへのプルリクエストでも実行 ★★★
+    branches: [ main, frontend/test ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      # ★★★ ワークフローが実行されたことを確認するためのステップ ★★★
+      - name: 📢 Announce workflow run
+        run: echo "🎉 Workflow triggered on branch ${{ github.ref_name }}!"
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 🔧 Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm install -g expo-cli eas-cli
+          npm install
+
+      - name: 💅 Run linter
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: 🧪 Run tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: 🚀 Build with EAS
+        # ★★★ mainブランチへのプッシュの時だけビルドを実行する
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: ./frontend
+        run: eas build --platform android --non-interactive --profile preview
+        env:
+          EXPO_TOKEN: ${{ secrets.EXO_TOKEN }}
