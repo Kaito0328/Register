@@ -1,22 +1,82 @@
-# 一時的メモアプリ (.temp)
+# Register - 一時的メモアプリ
 
-## 📝 アプリの概要
+![React Native](https://img.shields.io/badge/React%20Native-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-000020?style=flat-square&logo=expo&logoColor=white)
 
-**一時的メモアプリ**は、日常の思い付きやちょっとしたメモを素早く記録し、適切なタイミングで自動削除してくれるシンプルなメモアプリです。
+## プロジェクト概要
 
-- URL : https://expo.dev/accounts/kite0328/projects/frontend/builds/eed771ab-74f7-455b-8b98-837e52580140
+**Register**は、コンピュータサイエンスの「レジスタ」概念を応用した一時的メモアプリです。従来のメモアプリが長期保存に特化している中、このアプリは「一時的な記録」と「自動削除」に特化することで、新しいユーザー体験を提供します。
 
-上記のリンクからapkファイルをダウンロードして、アンドロイドアプリをインストールすることができます。
+### 開発動機・コンセプト
 
-### 🎯 主な特徴
+- **問題意識**: 買い物メモや駐車場の場所など、短期的なメモを長期保存型のアプリに保存することへの心理的抵抗
+- **解決アプローチ**: CPUレジスタの「一時保存」「自動上書き」の特性をUXに応用
+- **目標**: メモの「忘れる」機能により、ユーザーの認知負荷を軽減
 
-- **素早いメモ作成**: アプリを開くと即座に新しいメモを作成できます
-- **自動ライフサイクル管理**: メモに期限を設定すると自動的に削除されます
-- **直感的な操作**: スワイプでメモを削除、ピン留めで重要なメモを固定
-- **ダーク/ライトテーマ**: システム設定に応じた自動切り替え、または手動選択
-- **シンプルなUI**: 余計な機能を省いた、使いやすいインターフェース
+### 想定ユースケース
 
-### 📖 使い方
+1. **短期メモ**: 買い物リスト、駐車場の場所、待ち合わせ時間など
+2. **デバイス間データ転送**: スマホ→PC間でのテキスト共有（※バックエンド実装により実現予定）
+3. **一時的な計算結果**: コピペ用の計算結果や変換値の保存
+
+## デモ・インストール
+
+**Android APKダウンロード**: 
+- [Expo Build Link](https://expo.dev/accounts/kite0328/projects/frontend/builds/eed771ab-74f7-455b-8b98-837e52580140)
+
+> **注意**: 開発者署名のため、Androidで「不明なアプリ」の警告が表示される場合があります。以下のスクリーンショットからもアプリの様子を確認することが出来ます。
+
+## スクリーンショット
+
+### ホーム画面・メモ作成
+<div align="center">
+  <img src="screenshots/welcome_note.jpg" alt="ホーム画面（ライト）" width="300">
+  <img src="screenshots/new_note.jpg" alt="新規メモ作成" width="300">
+</div>
+
+*アプリを開いた時の初期画面と新しいメモの作成画面*
+<div align="center">
+  <img src="screenshots/kebabu_menu.jpg" alt="メモアクションメニュー" width="300">
+</div>
+
+*ケバブメニュー*
+
+### サイドメニュー・設定画面
+<div align="center">
+  <img src="screenshots/sideMenu_deleting.jpg" alt="サイドメニュー" width="300">
+  <img src="screenshots/setting.jpg" alt="設定画面（ライト）" width="300">
+</div>
+
+*ドロワーメニューでのメモ一覧と設定画面*
+
+### ダーク/ライトテーマ対応
+<div align="center">
+  <img src="screenshots/welcome_note_dark.jpg" alt="ホーム画面（ダーク）" width="300">
+  <img src="screenshots/sideMenu_dark.jpg" alt="サイドメニュー（ダーク）" width="300">
+  <img src="screenshots/setting_dark.jpg" alt="設定画面（ダーク）" width="300">
+</div>
+
+*デザインシステムの実装例：ダークテーマとライトテーマの両対応*
+
+## 主な技術的特徴
+
+###  アーキテクチャ設計
+- **独自デザインシステム**: Design Token System による一貫したUI実装
+- **状態管理**: React Context + Custom Hooks による効率的な状態管理
+- **型安全性**: TypeScript による堅牢な型システム
+
+### UX/UI設計
+- **即座のメモ作成**: アプリ起動と同時に新規メモが作成される UX
+- **自動ライフサイクル**: 期限に基づく自動削除機能
+- **レスポンシブデザイン**: ダーク/ライトテーマ完全対応
+
+### 技術的工夫
+- **デバウンス自動保存**: ユーザー入力の効率的な保存処理
+- **期限切れ検出**: アプリ起動時の自動クリーンアップ機能  
+- **コンポーネント設計**: Base → Composite → Screen の3層アーキテクチャ
+
+###  使い方
 
 #### 基本操作
 
@@ -48,345 +108,138 @@
 
 ---
 
-## 🛠️ 技術仕様
+## 技術スタック
 
-### 使用技術
+### フロントエンド
+```
+React Native + Expo        # クロスプラットフォーム開発
+TypeScript                 # 型安全な開発
+Expo Router                # ファイルベースルーティング
+React Navigation           # ネイティブナビゲーション
+AsyncStorage              # ローカルデータ永続化
+Lucide React Native       # アイコンライブラリ
+React Native Reanimated   # 高性能アニメーション
+```
 
-- **フレームワーク**: React Native + Expo
-- **言語**: TypeScript
-- **ナビゲーション**: Expo Router (ファイルベースルーティング)
-- **UI ライブラリ**: React Navigation (Drawer Navigation)
-- **状態管理**: React Context API + Custom Hooks
-- **データ永続化**: AsyncStorage
-- **アイコン**: Lucide React Native
-- **アニメーション**: React Native Reanimated + Gesture Handler
+### 開発環境・ツール
+```
+ESLint + Prettier         # コード品質管理
+Jest + Testing Library    # テスト自動化
+Expo CLI                  # 開発・デプロイツール
+TypeScript                # 型チェック
+```
+
+## アーキテクチャ設計
 
 ### プロジェクト構造
-
 ```
-frontend/
-├── src/
-│   ├── app/                    # ルーティング (Expo Router)
-│   │   ├── _layout.tsx         # ルートレイアウト (Provider設定)
-│   │   ├── settings.tsx        # 設定画面
-│   │   ├── (tabs)/
-│   │   │   └── index.tsx       # ホーム (新規メモ作成)
-│   │   └── note/
-│   │       └── [id].tsx        # メモ詳細・編集画面
-│   ├── base/                   # 基本UIコンポーネント
-│   │   ├── BaseView.tsx        # ベースビュー
-│   │   ├── BaseText.tsx        # ベーステキスト
-│   │   ├── BaseTextInput.tsx   # ベーステキスト入力
-│   │   ├── BaseIcon.tsx        # ベースアイコン
-│   │   └── BasePressable.tsx   # ベースタッチャブル
-│   ├── components/             # 機能別コンポーネント
-│   │   ├── Button.tsx          # 汎用ボタン
-│   │   ├── Drawer/             # ドロワーナビゲーション
-│   │   ├── Header/             # ヘッダー関連
-│   │   ├── Lifecycle/          # ライフサイクル設定
-│   │   ├── KebabMenu/          # アクションメニュー
-│   │   ├── StatusMessage/      # ステータス表示
-│   │   ├── editor/             # メモエディター
-│   │   ├── settings/           # 設定画面コンポーネント
-│   │   └── sideMenu/           # サイドメニュー
-│   ├── contexts/               # React Context
-│   │   ├── NotesContext.tsx    # メモ管理
-│   │   └── SettingsContext.tsx # アプリ設定
-│   ├── hooks/                  # カスタムフック
-│   │   ├── useNotes.ts         # メモ操作フック
-│   │   ├── useColorScheme.ts   # テーマ検出
-│   │   └── useThemeColor.ts    # テーマカラー
-│   ├── styles/                 # デザインシステム
-│   │   ├── component/          # コンポーネントスタイル
-│   │   ├── tokens/             # デザイントークン
-│   │   │   ├── color/          # カラーシステム
-│   │   │   ├── size/           # サイズシステム
-│   │   │   ├── shadow/         # シャドウ設定
-│   │   │   ├── round/          # 角丸設定
-│   │   │   └── fontWeight/     # フォント太さ
-│   │   └── themeMode.ts        # テーマモード定義
-│   ├── types/                  # 型定義
-│   │   ├── Note.ts             # メモ関連型
-│   │   ├── Settings.ts         # 設定関連型
-│   │   └── ComponentStatus.ts  # コンポーネント状態
-│   └── utils/                  # ユーティリティ
-│       ├── LifeCycleUtils.ts   # ライフサイクル計算
-│       └── utils.ts            # 汎用ユーティリティ
-├── assets/                     # 静的リソース
-├── android/                    # Android固有設定
-└── scripts/                    # ビルドスクリプト
+frontend/src/
+├── app/                    # 📱 Screen Layer (Expo Router)
+│   ├── _layout.tsx         # ルートレイアウト・Provider設定
+│   ├── settings.tsx        # 設定画面
+│   ├── index.tsx          # ホーム画面（新規メモ作成）
+│   └── note/[id].tsx      # メモ詳細・編集画面
+├── components/             #  Composite Layer
+│   ├── Drawer/            # ドロワーナビゲーション
+│   ├── Header/            # ヘッダーコンポーネント群
+│   ├── Lifecycle/         # ライフサイクル設定UI
+│   ├── editor/            # メモエディター機能群
+│   └── settings/          # 設定画面コンポーネント群
+├── base/                  # 🔧 Base Layer
+│   ├── BaseView.tsx       # StyleKit対応ビュー
+│   ├── BaseText.tsx       # StyleKit対応テキスト
+│   └── BaseTextInput.tsx  # StyleKit対応入力フィールド
+├── contexts/              #  State Management
+│   ├── NotesContext.tsx   # メモデータ管理
+│   └── SettingsContext.tsx # アプリ設定管理
+├── hooks/                 #  Business Logic
+│   ├── useNotes.ts        # メモ操作ロジック
+│   └── useThemeColor.ts   # テーマ管理ロジック
+├── styles/                #  Design System
+│   ├── tokens/            # Design Tokens
+│   │   ├── color/         # カラーシステム
+│   │   ├── size/          # サイズシステム
+│   │   └── shadow/        # シャドウ定義
+│   └── component/         # コンポーネントスタイル
+├── types/                 #  Type Definitions
+└── utils/                 # Utilities
+    └── LifeCycleUtils.ts  # ライフサイクル計算ロジック
 ```
 
-### 主要な機能モジュール
+### 設計思想・技術的な工夫
 
-#### 1. ライフサイクル管理システム
-- **自動削除機能**: 設定された期限に基づく自動削除
-- **バリデーション**: 期限設定値の検証
-- **残り時間計算**: リアルタイムでの残り時間表示
-- **期限切れ検出**: アプリ起動時の期限切れメモ検出
-
-#### 2. 状態管理アーキテクチャ
-- **Context API**: グローバル状態管理
-- **カスタムフック**: 再利用可能なロジック
-- **AsyncStorage**: データ永続化
-- **自動保存**: デバウンス機能付き自動保存
-
-#### 3. ナビゲーションシステム
-- **ファイルベースルーティング**: Expo Routerによる直感的なルーティング
-- **ドロワーナビゲーション**: サイドメニューでのメモ一覧
-- **スタック遷移**: メモ詳細への階層遷移
-
----
-
-## 🎨 デザインシステム
-
-### スタイル適用の仕組み
-
-本アプリでは、独自のデザインシステムを構築し、一貫性のあるUI/UXを実現しています。
-
-#### Design Token System
-
-**階層構造**:
-```
-Tokens (最下層) → Component Styles → UI Components (最上層)
-```
-
-**主要な Design Token**:
-
-1. **Color Tokens**
-   - `CoreColorKey`: `Primary`, `Secondary`, `Base`, `Danger`, `Success`
-   - テーマごと（Light/Dark）の色定義
-   - 状態ごと（Default/Pressed/Focus/Disabled）のバリエーション
-
-2. **Size Tokens**
-   - `SizeKey`: `SM`, `MD`, `LG`, `XL`
-   - Padding, Margin, FontSize の統一サイズ
-
-3. **Round Tokens**
-   - 角丸の統一規格
-
-4. **Shadow Tokens**
-   - 影効果の統一規格
-
-#### Style Kit システム
-
-各コンポーネントは `StyleKit` を通じてスタイルを適用:
-
+#### 1. Design Token System
 ```typescript
-// 例: ボタンコンポーネント
+// 階層構造: Tokens → Component Styles → UI Components
 <Button
   viewStyleKit={{
     color: { colorKey: CoreColorKey.Primary },
     size: { sizeKey: SizeKey.LG }
   }}
->
+/>
 ```
+- **一貫性**: 全コンポーネントで統一されたデザイン言語
+- **保守性**: Design Tokenの変更がアプリ全体に自動反映
+- **拡張性**: 新しいトークンの追加が容易
 
-#### テーマシステム
+#### 2. 3層アーキテクチャ
+- **Base Layer**: React Nativeコンポーネントの薄いラッパー
+- **Composite Layer**: ビジネスロジックを含む機能コンポーネント  
+- **Screen Layer**: ページレベルの構成とナビゲーション
 
-- **自動切り替え**: システム設定に応じたテーマ変更
-- **手動選択**: ユーザーによる明示的なテーマ選択
-- **リアルタイム反映**: 設定変更の即座な反映
+#### 3. 状態管理パターン
+```typescript
+// Context + Custom Hooks パターン
+const { notes, createNote, deleteNote } = useNotes();
+```
+- **責任分離**: Contextは状態、Hooksはロジック
+- **テスタビリティ**: ロジックの単体テストが容易
+- **再利用性**: 複数コンポーネントでのロジック共有
 
-### コンポーネント設計思想
+##  開発・ビルド
 
-#### Base Components
-最下層のコンポーネントで、Design Token を直接受け取り、React Native の基本コンポーネントをラップ:
-
-- `BaseView`: ViewのStyle Kit対応版
-- `BaseText`: TextのStyle Kit対応版  
-- `BaseTextInput`: TextInputのStyle Kit対応版
-
-#### Composite Components
-Base Components を組み合わせた機能的なコンポーネント:
-
-- `Button`: 各種ボタン
-- `LifecyclePanel`: ライフサイクル設定パネル
-- `StatusMessage`: ステータス表示
-
-#### Screen Components
-画面レベルのコンポーネント:
-
-- 複数のComposite Componentsを組み合わせ
-- ビジネスロジックとの連携
-- ナビゲーション処理
-
----
-
-## ⚠️ 現状の課題と制限事項
-
-### 1. データ管理の課題
-- **データバックアップ**: AsyncStorageのデータは端末に依存し、バックアップ機能がない
-- **同期機能なし**: 複数端末間でのデータ同期未対応
-- **データ容量制限**: 大量のメモ保存時のパフォーマンス未検証
-
-### 2. 機能面の制限
-- **検索機能**: メモの検索・フィルタリング機能がない
-- **カテゴリ分類**: メモのカテゴリやタグ機能未実装
-- **画像添付**: 画像やファイル添付機能なし
-- **エクスポート**: メモのエクスポート機能なし
-
-### 3. 技術的課題
-- **メモリ管理**: 大量メモ表示時のメモリ使用量最適化が必要
-- **エラーハンドリング**: 一部のエラーケースでの適切な処理が不十分
-- **テスト**: 自動テストの実装が不完全
-- **パフォーマンス**: 大量データでのスクロール性能未最適化
-
-### 4. UX/UI の改善点
-- **オフライン対応**: ネットワーク状況の表示・制御なし
-- **アクセシビリティ**: スクリーンリーダー対応が不十分
-- **キーボードショートカット**: 効率的なキーボード操作未対応
-- **手入力支援**: 予測変換やオートコンプリート機能なし
-
----
-
-## 🚀 今後の展望
-
-### 短期的な改善計画 (1-3ヶ月)
-
-#### 1. 基本機能の強化
-- **検索機能**: タイトル・本文での全文検索
-- **ソート機能**: 作成日時、更新日時、ライフサイクルでのソート
-- **一括操作**: 複数メモの一括削除・ライフサイクル変更
-- **ショートカット**: 新規作成、保存などのキーボードショートカット
-
-#### 2. UX/UI の改善
-- **ローディング表示**: 重い処理中の適切なフィードバック
-- **エラー表示**: ユーザーフレンドリーなエラーメッセージ
-- **アクセシビリティ**: VoiceOver/TalkBack対応
-- **アニメーション**: よりスムーズな画面遷移
-
-#### 3. 安定性向上
-- **自動テスト**: Unit/Integration テストの実装
-- **エラーログ**: クラッシュレポート機能
-- **パフォーマンス監視**: アプリ使用状況の分析
-
-### 中期的な機能拡張 (3-6ヶ月)
-
-#### 1. 高度なメモ管理
-- **カテゴリ・タグ**: メモの分類機能
-- **お気に入り**: 重要なメモのマーク機能
-- **履歴管理**: メモの編集履歴・復元機能
-- **テンプレート**: よく使うメモ形式のテンプレート化
-
-#### 2. データ同期・バックアップ
-- **クラウド同期**: iCloud/Google Drive連携
-- **エクスポート**: JSON/Markdown形式でのエクスポート
-- **インポート**: 他のメモアプリからのデータ移行
-- **自動バックアップ**: 定期的なデータバックアップ
-
-#### 3. 拡張機能
-- **画像添付**: 写真やスクリーンショットの添付
-- **音声メモ**: 音声録音・再生機能
-- **リマインダー**: 指定時刻での通知機能
-- **ダークモード強化**: より詳細なテーマカスタマイズ
-
-### 長期的なビジョン (6ヶ月〜)
-
-#### 1. AI機能の統合
-- **自動分類**: AIによるメモの自動カテゴリ分類
-- **内容要約**: 長いメモの自動要約生成
-- **関連メモ提案**: 類似メモの自動提案
-- **スマート期限設定**: 内容に基づく期限の自動提案
-
-#### 2. 共同編集・共有
-- **メモ共有**: 他ユーザーとのメモ共有
-- **共同編集**: リアルタイム共同編集
-- **チーム機能**: チーム内でのメモ共有・管理
-- **権限管理**: 読み取り専用・編集権限の管理
-
-#### 3. 高度な連携機能
-- **外部アプリ連携**: Slack、Discord等との連携
-- **API提供**: 外部システムからのアクセス機能
-- **Webhook**: メモ作成・更新時の外部通知
-- **自動化**: Zapier等との連携による自動化
-
-#### 4. プラットフォーム拡張
-- **Web版**: ブラウザでの利用
-- **デスクトップ版**: Electron等を使ったデスクトップアプリ
-- **ブラウザ拡張**: Chrome/Firefox拡張機能
-- **Apple Watch**: ウェアラブルデバイス対応
-
----
-
-## 🏃‍♂️ 開発・実行方法
-
-### 必要な環境
-
-- Node.js (v18以上)
-- npm または yarn
-- Expo CLI
-- Android Studio (Android開発時)
-- Xcode (iOS開発時)
-
-### セットアップ手順
-
-1. **依存関係のインストール**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. **開発サーバーの起動**
-   ```bash
-   npm run dev
-   # または
-   npx expo start
-   ```
-
-3. **アプリの実行**
-   - **Android**: `npm run android`
-   - **iOS**: `npm run ios`
-   - **Web**: `npm run web`
-
-### ビルド
-
-- **Android APK**: `npx expo build:android`
-- **iOS IPA**: `npx expo build:ios`
-
-### 開発時の便利コマンド
-
-- **リント**: `npm run lint`
-- **プロジェクトリセット**: `npm run reset-project`
-
----
-
-## 🛠️ WSL環境での開発セットアップ (参考)
-
-### 1. パッケージの更新
+### クイックスタート
 ```bash
-sudo apt update && sudo apt upgrade -y
+# リポジトリクローン
+git clone <repository-url>
+cd register/frontend
+
+# 依存関係インストール
+npm install
+
+# 開発サーバー起動
+npm run dev
 ```
 
-### 2. Node.jsのインストール (nvmを使用)
+### プラットフォーム別実行
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-# ターミナルを再起動してから
-nvm install --lts
+npm run android    # Android エミュレーター/実機
+npm run ios        # iOS シミュレーター/実機  
+npm run web        # Web ブラウザ
+npm start          # Expo開発サーバー起動
 ```
 
-### 3. Java (JDK) のインストール
+### ビルド・デプロイ
 ```bash
-sudo apt install openjdk-21-jdk -y
+# EAS Build (推奨)
+npx eas build --platform android
+npx eas build --platform ios
+
+# 従来のビルド方法（非推奨）
+expo build:android   # Android APK
+expo build:ios       # iOS IPA
 ```
 
-### 4. Android Studioのインストール
-WSL内でブラウザを開くのは少し手間なので、WindowsのブラウザでAndroid Studioの公式サイトからLinux用の .tar.gz ファイルをダウンロードします。
-
+### 開発ツール
 ```bash
-# Windowsのダウンロードフォルダに移動
-cd /mnt/c/Users/あなたの名前/Downloads
-
-# Android Studioを展開
-tar -xzf android-studio-*-linux.tar.gz
-
-# 展開したフォルダを/optなどに移動
-sudo mv android-studio /opt/
-
-# セットアップウィザードを起動
-/opt/android-studio/bin/studio.sh
+npm run lint           # ESLint実行
+npm run test           # Jest テスト実行
+npm run test:watch     # テスト監視モード
+npm run test:coverage  # カバレッジ付きテスト
+npm run reset-project  # プロジェクトリセット
 ```
 
----
-
-本アプリは、シンプルでありながら実用的なメモ管理を目指して開発されています。ユーザーフィードバックを重視し、継続的な改善を通じて、より良いアプリケーションへと発展させていく予定です。
+## 今後の発展計画
+- **バックエンド開発**: Node.js + Express による API サーバー構築予定
+- **リアルタイム同期**: WebSocket を活用したデバイス間同期機能
+- **テスト充実**: E2E テスト、パフォーマンステストの実装
