@@ -1,4 +1,4 @@
-import { LifecycleUnit, SpecialLifeCycleUnit, type NoteLifecycle } from './Note';
+import { ExtensionLifecycle, LifecycleUnit, SpecialLifeCycleUnit, TimeUnit, type NoteLifecycle } from './Note';
 
 /**
  * テーマ設定の選択肢
@@ -22,6 +22,8 @@ export type AppSettings = {
    * ノートのデフォルトのライフサイクル設定
    */
   defaultLifecycle: NoteLifecycle;
+  extensionLifecycle: ExtensionLifecycle;
+
   /**
    * ノート削除時に確認ダイアログを表示するか
    */
@@ -33,6 +35,10 @@ export const defaultAppSettings: AppSettings = {
   defaultLifecycle: {
     unit: SpecialLifeCycleUnit.Forever,
     value: null,
+  },
+  extensionLifecycle: {
+    unit: TimeUnit.Day,
+    value: 1,
   },
   confirmBeforeDelete: true,
 };

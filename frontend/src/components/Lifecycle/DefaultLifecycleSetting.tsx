@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { NoteLifecycle, SpecialLifeCycleUnit } from '@/types/Note';
+import { ExtensionLifecycle, NoteLifecycle, SpecialLifeCycleUnit } from '@/types/Note';
 import { getErrorMessage, isValidLifecycle } from '@/utils/LifeCycleUtils';
 import { LifecyclePanel } from './LifecyclePanel';
 import { SpecialLifecycleSelector } from './SpecialLifecycleSelector';
@@ -11,12 +11,15 @@ import { CoreColorKey } from '@/styles/tokens';
 
 type Props = {
   defaultLifecycle: NoteLifecycle;
+  defaultExtensionLifecycle: ExtensionLifecycle; // オプションで延長ライフサイクルも受け取る
   saveDefaultLifecycle: (lifecycle: NoteLifecycle) => Promise<void> | void; // asyncを考慮
+  saveExtensionLifecycle: (lifecycle: ExtensionLifecycle) => Promise<void> | void; // asyncを考慮
 };
 
-export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, saveDefaultLifecycle }) => {
+export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, defaultExtensionLifecycle, saveDefaultLifecycle, saveExtensionLifecycle }) => {
   // ★★★ 1. 編集中のライフサイクルを管理するためのstateを追加
   const [lifecycle, setLifecycle] = useState<NoteLifecycle>(defaultLifecycle);
+  const [extensionLifecycle, setExtensionLifecycle] = useState<ExtensionLifecycle>(defaultExtensionLifecycle);
   const [saveStatus, setSaveStatus] = useState<ComponentStatus>(ComponentStatus.Idle);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +42,7 @@ export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, sav
       setError(null);
       try {
         await saveDefaultLifecycle(lifecycle);
+        await saveExtensionLifecycle(extensionLifecycle);
         setSaveStatus(ComponentStatus.Success);
         setTimeout(() => setSaveStatus(ComponentStatus.Idle), 2000);
       } catch (e) {
@@ -58,7 +62,8 @@ export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, sav
   // ★★★ 3. ノートが切り替わった時に、内部のstateも追従させる
   useEffect(() => {
     setLifecycle(defaultLifecycle);
-  }, [defaultLifecycle]);
+    setExtensionLifecycle(defaultExtensionLifecycle);
+  }, [defaultLifecycle, defaultExtensionLifecycle]);
 
   const handleSelectSpecialUnit = (unit: SpecialLifeCycleUnit) => {
     // この関数は直接stateを更新する
@@ -83,6 +88,20 @@ export const DefaultLifecycleSetting: React.FC<Props> = ({ defaultLifecycle, sav
           />
         </View>
       </LifecyclePanel>
+
+      <LifecyclePanel
+        lifecycle={extensionLifecycle}
+        onChangeLifecycle={setExtensionLifecycle as (lifecycle: NoteLifecycle) => void} // 型を合わせるためにキャスト
+        isExpanded={true} // 設定画面では常に開いておく
+      >
+        <View style={styles.displayContent}>
+          <BaseText styleKit={{ color: { colorKey: CoreColorKey.Base } }}>
+            延長時間
+          </BaseText>
+        </View>
+      </LifecyclePanel>
+
+      
 
       <StatusMessage
         status={saveStatus}

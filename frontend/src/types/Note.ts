@@ -69,3 +69,7 @@ export type RemainingTime =
   // 特殊な状態 (例: { value: null, unit: '無期限' })
   | { value: null | 0; unit: RemainingTimeSpecialStatus; };
 
+export type ExtensionLifecycle = {
+  unit: TimeUnit;
+  value: number;
+} 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { defaultAppSettings, ThemeOption, type AppSettings } from '@/types/Settings';
-import type { NoteLifecycle } from '@/types/Note';
+import type { ExtensionLifecycle, NoteLifecycle } from '@/types/Note';
 import { LifecycleUnit } from '@/types/Note';
 import { ThemeMode } from '@/styles/themeMode';
 import { useColorScheme } from 'react-native';
@@ -14,6 +14,7 @@ type SettingsContextType = {
   setTheme: (theme: ThemeOption) => void;
   setDefaultLifecycle: (lifecycle: NoteLifecycle) => void;
   setConfirmBeforeDelete: (enabled: boolean) => void;
+  setExtensionLifecycle: (lifecycle: ExtensionLifecycle) => void;
   isReady: boolean; // ★ 設定の読み込み完了を通知するフラグ
 };
 
@@ -23,7 +24,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   const [isReady, setIsReady] = useState(false);
   const [settings, setSettings] = useState<AppSettings>(defaultAppSettings);
   const [themeMode, setThemeMode] = useState<ThemeMode>(ThemeMode.Light);
-
   const systemTheme = useColorScheme();
 
   useEffect(() => {
@@ -74,8 +74,12 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     setSettings((prev) => ({ ...prev, confirmBeforeDelete: enabled }));
   }, []);
 
+  const setExtensionLifecycle = useCallback((lifecycle: ExtensionLifecycle) => {
+    setSettings((prev) => ({ ...prev, extensionLifecycle: lifecycle }));
+  }, []);
+
   return (
-    <SettingsContext.Provider value={{ settings, themeMode, setTheme, setDefaultLifecycle, setConfirmBeforeDelete, isReady }}>
+    <SettingsContext.Provider value={{ settings, themeMode, setTheme, setDefaultLifecycle, setConfirmBeforeDelete, setExtensionLifecycle, isReady }}>
       {children}
     </SettingsContext.Provider>
   );

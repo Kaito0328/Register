@@ -1,4 +1,5 @@
-import { LifecycleUnit, Note, NoteLifecycle, RemainingTime, RemainingTimeDisplayUnit, RemainingTimeSpecialStatus, SpecialLifeCycleUnit as SpecialLifecycleUnit, TimeUnit } from '@/types/Note';
+import { ExtensionLifecycle, LifecycleUnit, Note, NoteLifecycle, RemainingTime, RemainingTimeDisplayUnit, RemainingTimeSpecialStatus, SpecialLifeCycleUnit as SpecialLifecycleUnit, TimeUnit } from '@/types/Note';
+import dayjs from 'dayjs';
 
 export const LifeCycleNameMap: Record<LifecycleUnit, string> = {
   [SpecialLifecycleUnit.Forever]: '無期限',
@@ -70,6 +71,43 @@ export function isTimeUnit(unit: LifecycleUnit): boolean {
   return unit !== SpecialLifecycleUnit.Forever && unit !== SpecialLifecycleUnit.Today;
 }
 
+export const getRemainingTime = (expiresAt: number | null): RemainingTime => {
+  if (expiresAt === null) {
+    return { value: null, unit: RemainingTimeSpecialStatus.Forever };
+  }
+
+  const now = dayjs();
+  const target = dayjs(expiresAt);
+
+  if (now.isAfter(target)) {
+    return { value: 0, unit: RemainingTimeSpecialStatus.Expired };
+  }
+
+  // diffは単位ごとに切り替え
+  const minutes = target.diff(now, 'minute');
+  if (minutes < 60) {
+    return { value: minutes, unit: RemainingTimeDisplayUnit.Minute };
+  }
+
+  const hours = target.diff(now, 'hour');
+  if (hours < 24) {
+    return { value: hours, unit: RemainingTimeDisplayUnit.Hour };
+  }
+
+  const days = target.diff(now, 'day');
+  if (days < 30) {
+    return { value: days, unit: RemainingTimeDisplayUnit.Day };
+  }
+
+  const months = target.diff(now, 'month');
+  if (months < 12) {
+    return { value: months, unit: RemainingTimeDisplayUnit.Month };
+  }
+
+  const years = target.diff(now, 'year');
+  return { value: years, unit: RemainingTimeDisplayUnit.Year };
+};
+
 export const calculateExpiresAt = (lifecycle: NoteLifecycle, createdAt: number): number | null => {
   const { unit, value } = lifecycle;
 
@@ -77,75 +115,60 @@ export const calculateExpiresAt = (lifecycle: NoteLifecycle, createdAt: number):
     return null;
   }
 
-  const expirationDate = new Date(createdAt);
+  const created = dayjs(createdAt);
 
   if (unit === SpecialLifecycleUnit.Today) {
-    expirationDate.setHours(23, 59, 59, 999); // その日の終わりに設定
-    return expirationDate.getTime();
+    return created.endOf('day').valueOf();
   }
 
-  // isTimeUnitガードのおかげで、このブロックではunitが時間単位であることが保証される
   if (isTimeUnit(unit) && value !== null) {
     switch (unit) {
       case TimeUnit.Hour:
-        expirationDate.setHours(expirationDate.getHours() + value);
-        break;
+        return created.add(value, 'hour').valueOf();
       case TimeUnit.Day:
-        expirationDate.setDate(expirationDate.getDate() + value);
-        break;
+        return created.add(value, 'day').valueOf();
+      case TimeUnit.Week:
+        return created.add(value, 'week').valueOf();
       case TimeUnit.Month:
-        expirationDate.setMonth(expirationDate.getMonth() + value);
-        break;
+        return created.add(value, 'month').valueOf();
       case TimeUnit.Year:
-        expirationDate.setFullYear(expirationDate.getFullYear() + value);
-        break;
+        return created.add(value, 'year').valueOf();
     }
-    return expirationDate.getTime();
   }
 
-  // 不正な組み合わせの場合は現在時刻を返すなど、エラーハンドリングも可能
-  return new Date().getTime();
+  // 不正なケースは現在時刻
+  return dayjs().valueOf();
 };
 
+export const convertDay = (unit: TimeUnit): dayjs.ManipulateType => {
+  let dayjsUnit: dayjs.ManipulateType
+  switch (unit) {
+    case TimeUnit.Hour:
+      dayjsUnit = 'hour';
+      break;
+    case TimeUnit.Day:
+      dayjsUnit = 'day';
+      break;
+    case TimeUnit.Week:
+      dayjsUnit = 'week';
+      break;
+    case TimeUnit.Month:
+      dayjsUnit = 'month';
+      break;
+    case TimeUnit.Year:
+      dayjsUnit = 'year';
+      break;
+    default:
+      throw new Error('不明な単位です。');
+  }
 
-const MILLISECONDS = {
-  MINUTE: 1000 * 60,
-  HOUR: 1000 * 60 * 60,
-  DAY: 1000 * 60 * 60 * 24,
-  MONTH: 1000 * 60 * 60 * 24 * 30.44,
-  YEAR: 1000 * 60 * 60 * 24 * 365.24,
+  return dayjsUnit;
 };
 
-/**
- * ノートの有効期限から、現在時刻との差分を計算して返します。
- * @param note ライフサイクル情報を含むノートオブジェクト
- * @returns 計算された残り時間({ value, unit })
- */
-export const getRemainingTime = (expiresAt: number | null): RemainingTime => {
-  // expiresAtがnullなら無期限
-  if (expiresAt === null) {
-    return { value: null, unit: RemainingTimeSpecialStatus.Forever };
-  }
+export const extendExpiresAt = (extend: ExtensionLifecycle, expiresAt: number): number => {
+  const { unit, value } = extend;
+  const dayjsUnit = convertDay(unit);
+  const newExpiresAt = dayjs(expiresAt).add(value, dayjsUnit).valueOf();
 
-  const remainingMs = expiresAt - Date.now();
-
-  // 期限切れか判定
-  if (remainingMs <= 0) {
-    return { value: 0, unit: RemainingTimeSpecialStatus.Expired };
-  }
-  
-  // 残り時間に応じて最適な単位に変換
-  if (remainingMs < MILLISECONDS.HOUR) {
-    return { value: Math.ceil(remainingMs / MILLISECONDS.MINUTE), unit: RemainingTimeDisplayUnit.Minute };
-  }
-  if (remainingMs < MILLISECONDS.DAY) {
-    return { value: Math.ceil(remainingMs / MILLISECONDS.HOUR), unit: RemainingTimeDisplayUnit.Hour };
-  }
-  if (remainingMs < MILLISECONDS.MONTH) {
-    return { value: Math.ceil(remainingMs / MILLISECONDS.DAY), unit: RemainingTimeDisplayUnit.Day };
-  }
-  if (remainingMs < MILLISECONDS.YEAR) {
-    return { value: Math.ceil(remainingMs / MILLISECONDS.MONTH), unit: RemainingTimeDisplayUnit.Month };
-  }
-  return { value: Math.ceil(remainingMs / MILLISECONDS.YEAR), unit: RemainingTimeDisplayUnit.Year };
-};
+  return newExpiresAt;
+};  

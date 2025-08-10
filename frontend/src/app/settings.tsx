@@ -13,7 +13,7 @@ import { Button } from '@/components/Button';
 import { View } from 'react-native';
 
 export default function SettingsScreen() {
-  const {settings, setDefaultLifecycle} = useSettings();
+  const {settings, setDefaultLifecycle, setExtensionLifecycle} = useSettings();
 
   const handleClearStorage = () => {
     Alert.alert(
@@ -55,7 +55,9 @@ export default function SettingsScreen() {
           <SettingsSection title="ノート">
             <DefaultLifecycleSetting
               defaultLifecycle={settings.defaultLifecycle}
+              defaultExtensionLifecycle={settings.extensionLifecycle}
               saveDefaultLifecycle={setDefaultLifecycle}
+              saveExtensionLifecycle={setExtensionLifecycle}
             />
           </SettingsSection>
           <SettingsSection title="開発用">
